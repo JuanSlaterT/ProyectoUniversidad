@@ -19,6 +19,8 @@ import {
   TrendingUp as TrendingIcon,
 } from '@mui/icons-material';
 import styled from 'styled-components';
+import { useState, useEffect } from 'react';
+import { analyticsService } from '../../../services/analyticsService';
 
 const StatsCard = styled(Card)`
   background: linear-gradient(135deg, #4CAF50 0%, #66BB6A 100%);
@@ -27,11 +29,60 @@ const StatsCard = styled(Card)`
 `;
 
 const DashboardPage = () => {
-  const stats = [
-    { title: 'Estudiantes Activos', value: '1,247', icon: <PeopleIcon />, change: '+12%' },
-    { title: 'Clases en Vivo', value: '8', icon: <PlayIcon />, change: '+3' },
-    { title: 'Clases Grabadas', value: '156', icon: <SchoolIcon />, change: '+24' },
-    { title: 'Engagement', value: '89%', icon: <TrendingIcon />, change: '+5%' },
+  const [stats, setStats] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadDashboardData = async () => {
+      try {
+        setLoading(true);
+        const dashboardData = await analyticsService.getDashboardStats();
+        setStats(dashboardData);
+      } catch (error) {
+        console.error('Error loading dashboard data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadDashboardData();
+  }, []);
+
+  if (loading) {
+    return (
+      <Container maxWidth="lg">
+        <Typography variant="h4" gutterBottom>
+          Cargando dashboard...
+        </Typography>
+      </Container>
+    );
+  }
+
+  const statsData = [
+    { 
+      title: 'Estudiantes Activos', 
+      value: stats?.totalStudents?.toLocaleString() || '0', 
+      icon: <PeopleIcon />, 
+      change: `+${stats?.weeklyGrowth?.students || 0}%` 
+    },
+    { 
+      title: 'Clases en Vivo', 
+      value: stats?.activeStreams?.toString() || '0', 
+      icon: <PlayIcon />, 
+      change: `+${stats?.weeklyGrowth?.streams || 0}` 
+    },
+    { 
+      title: 'Clases Grabadas', 
+      value: stats?.recordedClasses?.toString() || '0', 
+      icon: <SchoolIcon />, 
+      change: `+${stats?.weeklyGrowth?.classes || 0}` 
+    },
+    { 
+      title: 'Engagement', 
+      value: `${stats?.engagement || 0}%`, 
+      icon: <TrendingIcon />, 
+      change: `+${stats?.weeklyGrowth?.engagement || 0}%` 
+    },
   ];
 
   return (
@@ -41,7 +92,7 @@ const DashboardPage = () => {
       </Typography>
 
       <Grid container spacing={3} mb={4}>
-        {stats.map((stat, index) => (
+        {statsData.map((stat, index) => (
           <Grid item xs={12} sm={6} md={3} key={index}>
             <StatsCard>
               <CardContent>
@@ -73,7 +124,22 @@ const DashboardPage = () => {
             <Typography variant="h6" gutterBottom>
               Clases Programadas
             </Typography>
-            <Button variant="contained" color="secondary" sx={{ mb: 2 }}>
+            <Button 
+              variant="contained" 
+              color="secondary" 
+              sx={{ 
+                mb: 2,
+                backgroundColor: '#4CAF50',
+                color: 'white',
+                '&:hover': {
+                  backgroundColor: '#45a049',
+                },
+                fontWeight: 600,
+                textTransform: 'none',
+                px: 3,
+                py: 1
+              }}
+            >
               Crear Nueva Clase
             </Button>
             <List>
@@ -99,18 +165,14 @@ const DashboardPage = () => {
               Actividad Reciente
             </Typography>
             <List>
-              <ListItem>
-                <ListItemText
-                  primary="Nueva pregunta en chat"
-                  secondary="hace 5 min"
-                />
-              </ListItem>
-              <ListItem>
-                <ListItemText
-                  primary="156 estudiantes conectados"
-                  secondary="hace 12 min"
-                />
-              </ListItem>
+              {stats?.recentActivity?.map((activity) => (
+                <ListItem key={activity.id}>
+                  <ListItemText
+                    primary={activity.message}
+                    secondary={activity.timestamp}
+                  />
+                </ListItem>
+              ))}
             </List>
           </Paper>
         </Grid>

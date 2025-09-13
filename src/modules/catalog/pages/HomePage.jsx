@@ -64,75 +64,6 @@ const ViewersBadge = styled(Box)`
   font-size: 0.75rem;
 `;
 
-const mockStreams = [
-  {
-    id: 1,
-    title: 'Matemáticas Avanzadas - Cálculo Integral',
-    teacher: 'Prof. María González',
-    viewers: 245,
-    isLive: true,
-    thumbnail: 'https://images.pexels.com/photos/3184463/pexels-photo-3184463.jpeg?auto=compress&cs=tinysrgb&w=400',
-    category: 'Matemáticas',
-    duration: '2:30:00',
-    rating: 4.8,
-  },
-  {
-    id: 2,
-    title: 'Historia Universal - Segunda Guerra Mundial',
-    teacher: 'Prof. Carlos Ruiz',
-    viewers: 189,
-    isLive: true,
-    thumbnail: 'https://images.pexels.com/photos/256455/pexels-photo-256455.jpeg?auto=compress&cs=tinysrgb&w=400',
-    category: 'Historia',
-    duration: '1:45:00',
-    rating: 4.6,
-  },
-  {
-    id: 3,
-    title: 'Programación en Python - Estructuras de Datos',
-    teacher: 'Prof. Ana Martínez',
-    viewers: 342,
-    isLive: false,
-    thumbnail: 'https://images.pexels.com/photos/546819/pexels-photo-546819.jpeg?auto=compress&cs=tinysrgb&w=400',
-    category: 'Programación',
-    duration: '3:15:00',
-    rating: 4.9,
-  },
-  {
-    id: 4,
-    title: 'Física Cuántica - Principios Fundamentales',
-    teacher: 'Prof. Roberto Silva',
-    viewers: 156,
-    isLive: true,
-    thumbnail: 'https://images.pexels.com/photos/2280571/pexels-photo-2280571.jpeg?auto=compress&cs=tinysrgb&w=400',
-    category: 'Física',
-    duration: '2:00:00',
-    rating: 4.7,
-  },
-  {
-    id: 5,
-    title: 'Literatura Española - Generación del 98',
-    teacher: 'Prof. Elena Vargas',
-    viewers: 98,
-    isLive: false,
-    thumbnail: 'https://images.pexels.com/photos/1029141/pexels-photo-1029141.jpeg?auto=compress&cs=tinysrgb&w=400',
-    category: 'Literatura',
-    duration: '1:30:00',
-    rating: 4.5,
-  },
-  {
-    id: 6,
-    title: 'Química Orgánica - Reacciones y Síntesis',
-    teacher: 'Prof. Miguel Torres',
-    viewers: 201,
-    isLive: true,
-    thumbnail: 'https://images.pexels.com/photos/2280549/pexels-photo-2280549.jpeg?auto=compress&cs=tinysrgb&w=400',
-    category: 'Química',
-    duration: '2:45:00',
-    rating: 4.8,
-  },
-];
-
 const HomePage = () => {
   const [liveStreams, setLiveStreams] = useState([]);
   const [recordedClasses, setRecordedClasses] = useState([]);
@@ -183,10 +114,6 @@ const HomePage = () => {
           sx={{
             backgroundColor: 'white',
             color: '#4CAF50',
-            '&:hover': { 
-              backgroundColor: '#f5f5f5',
-              color: '#4CAF50'
-            },
             px: 4,
             py: 1.5,
             fontSize: '1.1rem',
