@@ -27,6 +27,7 @@ import {
 } from '@mui/icons-material';
 import styled from 'styled-components';
 import { useParams } from 'react-router-dom';
+import { streamingService, chatService } from '../../../services';
 
 const StreamContainer = styled(Paper)`
   background: #000;
@@ -91,24 +92,46 @@ const QualitySelector = styled(FormControl)`
 const LiveStreamPage = () => {
   const { streamId } = useParams();
   const videoRef = useRef(null);
-  const [viewers] = useState(245);
+  const [viewers, setViewers] = useState(0);
   const [chatMessage, setChatMessage] = useState('');
   const [quality, setQuality] = useState('auto');
-  const [messages, setMessages] = useState([
-    { id: 1, user: 'Ana M.', message: '¡Excelente clase!', time: '14:25' },
-    { id: 2, user: 'Carlos R.', message: '¿Podrías repetir la última parte?', time: '14:26' },
-    { id: 3, user: 'María G.', message: 'Muy clara la explicación', time: '14:27' },
-  ]);
+  const [messages, setMessages] = useState([]);
+  const [streamData, setStreamData] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  // Mock stream data
-  const streamData = {
-    title: 'Matemáticas Avanzadas - Cálculo Integral',
-    teacher: 'Prof. María González',
-    description: 'En esta clase revisaremos los conceptos fundamentales del cálculo integral, incluyendo técnicas de integración y aplicaciones prácticas.',
-    category: 'Matemáticas',
-    startTime: '14:00',
-    estimatedDuration: '2:30:00',
-  };
+  useEffect(() => {
+    const loadStreamData = async () => {
+      try {
+        setLoading(true);
+        const stream = await streamingService.getStreamDetails(streamId);
+        setStreamData(stream);
+        setViewers(stream.viewers);
+        
+        // Cargar mensajes del chat
+        const chatMessages = await chatService.getChatMessages(streamId);
+        setMessages(chatMessages);
+        
+        // Suscribirse a nuevos mensajes
+        const unsubscribe = chatService.subscribeToMessages(streamId, (newMessage) => {
+          setMessages(prev => [...prev, newMessage]);
+        });
+        
+        return unsubscribe;
+      } catch (error) {
+        console.error('Error loading stream data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    const cleanup = loadStreamData();
+    
+    return () => {
+      if (cleanup) {
+        cleanup.then(unsubscribe => unsubscribe && unsubscribe());
+      }
+    };
+  }, [streamId]);
 
   const qualityOptions = [
     { value: 'auto', label: 'Auto' },
@@ -138,16 +161,14 @@ const LiveStreamPage = () => {
     adaptiveQuality();
   }, [quality]);
 
-  const handleSendMessage = () => {
+  const handleSendMessage = async () => {
     if (chatMessage.trim()) {
-      const newMessage = {
-        id: Date.now(),
-        user: 'Tú',
-        message: chatMessage,
-        time: new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }),
-      };
-      setMessages(prev => [...prev, newMessage]);
-      setChatMessage('');
+      try {
+        await chatService.sendMessage(streamId, chatMessage, 'current-user');
+        setChatMessage('');
+      } catch (error) {
+        console.error('Error sending message:', error);
+      }
     }
   };
 
@@ -158,6 +179,14 @@ const LiveStreamPage = () => {
       }
     }
   };
+
+  if (loading) {
+    return (
+      <Box sx={{ p: 2 }}>
+        <Typography variant="h6">Cargando stream...</Typography>
+      </Box>
+    );
+  }
 
   return (
     <Box sx={{ p: 2 }}>
@@ -223,22 +252,22 @@ const LiveStreamPage = () => {
           <StreamInfo>
             <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2, mb: 2 }}>
               <Avatar sx={{ bgcolor: '#4CAF50' }}>
-                {streamData.teacher.split(' ').map(n => n[0]).join('')}
+                {streamData?.teacher?.split(' ').map(n => n[0]).join('') || 'P'}
               </Avatar>
               <Box sx={{ flex: 1 }}>
                 <Typography variant="h5" gutterBottom>
-                  {streamData.title}
+                  {streamData?.title || 'Cargando...'}
                 </Typography>
                 <Typography variant="subtitle1" color="text.secondary" gutterBottom>
-                  {streamData.teacher}
+                  {streamData?.teacher || 'Profesor'}
                 </Typography>
                 <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
-                  <Chip label={streamData.category} color="primary" size="small" />
-                  <Chip label={`Iniciado: ${streamData.startTime}`} variant="outlined" size="small" />
-                  <Chip label={`Duración: ${streamData.estimatedDuration}`} variant="outlined" size="small" />
+                  <Chip label={streamData?.category || 'Categoría'} color="primary" size="small" />
+                  <Chip label={`Iniciado: ${streamData?.startTime || '00:00'}`} variant="outlined" size="small" />
+                  <Chip label={`Duración: ${streamData?.estimatedDuration || '0:00'}`} variant="outlined" size="small" />
                 </Box>
                 <Typography variant="body1">
-                  {streamData.description}
+                  {streamData?.description || 'Descripción no disponible'}
                 </Typography>
               </Box>
             </Box>
@@ -273,7 +302,7 @@ const LiveStreamPage = () => {
                             {msg.user}
                           </Typography>
                           <Typography variant="caption" color="text.secondary">
-                            {msg.time}
+                            {msg.timestamp}
                           </Typography>
                         </Box>
                       }

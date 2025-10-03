@@ -16,6 +16,8 @@ export const NotificationProvider = ({ children }) => {
         setUserNotifications(notifications);
       } catch (error) {
         console.error('Error loading notifications:', error);
+        // En caso de error, usar notificaciones vacías
+        setUserNotifications([]);
       }
     };
 
@@ -37,7 +39,7 @@ export const NotificationProvider = ({ children }) => {
     setNotifications(prev => prev.filter(notification => notification.id !== id));
   };
 
-  const markNotificationAsRead = async (notificationId) => {
+  const markAsRead = async (notificationId) => {
     try {
       await notificationService.markAsRead(notificationId);
       setUserNotifications(prev => 
@@ -52,11 +54,35 @@ export const NotificationProvider = ({ children }) => {
     }
   };
 
+  const markAllAsRead = async () => {
+    try {
+      const unreadNotifications = userNotifications.filter(n => !n.isRead);
+      await Promise.all(unreadNotifications.map(n => notificationService.markAsRead(n.id)));
+      
+      setUserNotifications(prev => 
+        prev.map(notification => ({ ...notification, isRead: true }))
+      );
+    } catch (error) {
+      console.error('Error marking all notifications as read:', error);
+    }
+  };
+
+  const getUnreadCount = () => {
+    return userNotifications.filter(notification => !notification.isRead).length;
+  };
+
+  const getNotificationsByType = (type) => {
+    return userNotifications.filter(notification => notification.type === type);
+  };
+
   const value = {
     notifications: userNotifications,
     showNotification,
     removeNotification,
-    markNotificationAsRead,
+    markAsRead,
+    markAllAsRead,
+    getUnreadCount,
+    getNotificationsByType,
   };
 
   return (
@@ -74,6 +100,11 @@ export const NotificationProvider = ({ children }) => {
             onClose={() => removeNotification(notification.id)}
             severity={notification.severity}
             variant="filled"
+            sx={{
+              '& .MuiAlert-message': {
+                fontWeight: 500,
+              }
+            }}
           >
             {notification.message}
           </Alert>
