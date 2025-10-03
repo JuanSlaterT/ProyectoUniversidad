@@ -271,24 +271,12 @@ Este proyecto incluye un **modo demo completo** que funciona sin backend:
 
 Este proyecto está bajo la Licencia MIT. Ver el archivo `LICENSE` para más detalles.
 
-## 👥 Autores
-
-- **Tu Nombre** - *Desarrollo inicial* - [GitHub](https://github.com/tu-usuario)
-
 ## 🙏 Agradecimientos
 
 - Material-UI por los componentes
 - React Query por la gestión de estado
 - Socket.io por la comunicación en tiempo real
-- Video.js por el reproductor de video
-
-##  Soporte
-
-Si tienes preguntas o necesitas ayuda:
-
-- 📧 Email: soporte@edustreaming.com
-- 💬 Discord: [Servidor de Discord](https://discord.gg/edustreaming)
-- 📖 Documentación: [docs.edustreaming.com](https://docs.edustreaming.com)
+- Video.js por el reproductor de video¡
 
 ---
 

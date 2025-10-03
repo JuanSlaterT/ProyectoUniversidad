@@ -1,15 +1,123 @@
 # 🐳 Guía Completa: Instalación de Docker y Despliegue de EduStreaming
 
+## 📚 Estudio de Caso: Implementación de Plataforma de Streaming Educativo
+
+### 🎯 Contexto del Proyecto
+
+Una universidad necesita implementar una plataforma de streaming para transmitir clases en vivo y bajo demanda a estudiantes remotos. La solución debe soportar hasta 500 conexiones simultáneas y ofrecer calidad adaptativa según el ancho de banda de cada usuario.
+
+### 🏫 Información de Análisis del Proyecto de Aula
+
+#### **Objetivos del Proyecto:**
+- **Objetivo Principal**: Desarrollar una plataforma web de streaming educativo que permita la transmisión de clases en vivo y contenido bajo demanda
+- **Objetivo Técnico**: Implementar una solución escalable usando tecnologías modernas (React, Docker, Nginx)
+- **Objetivo Académico**: Demostrar competencias en desarrollo full-stack, containerización y despliegue de aplicaciones
+
+#### **Requerimientos Funcionales:**
+- ✅ **Sistema de Autenticación**: Login/registro de usuarios con roles (estudiante, profesor, admin)
+- ✅ **Streaming en Vivo**: Transmisión de clases en tiempo real con chat interactivo
+- ✅ **Contenido Bajo Demanda**: Biblioteca de clases grabadas con búsqueda avanzada
+- ✅ **Sistema de Notificaciones**: Alertas para nuevas clases, tareas y recordatorios
+- ✅ **Dashboard Administrativo**: Panel de control para profesores y administradores
+- ✅ **Perfil de Usuario**: Gestión de información personal y progreso académico
+
+#### **Requerimientos No Funcionales:**
+- **Escalabilidad**: Soporte para 500+ conexiones simultáneas
+- **Rendimiento**: Tiempo de carga < 3 segundos
+- **Disponibilidad**: 99.9% de uptime
+- **Seguridad**: Autenticación segura y encriptación de datos
+- **Usabilidad**: Interfaz intuitiva y responsive design
+- **Compatibilidad**: Funcionamiento en múltiples navegadores y dispositivos
+
+#### **Tecnologías Implementadas:**
+- **Frontend**: React 18 + Vite + Material-UI + Styled Components
+- **Containerización**: Docker + Docker Compose
+- **Servidor Web**: Nginx con configuración optimizada
+- **Estado Global**: Context API + React Query
+- **Routing**: React Router DOM
+- **Estilos**: Material-UI + Styled Components + CSS3
+
+#### **Arquitectura de la Solución:**
+```
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│   Frontend      │    │   Docker        │    │   Nginx         │
+│   (React SPA)   │◄──►│   Container     │◄──►│   Web Server    │
+│                 │    │                 │    │                 │
+└─────────────────┘    └─────────────────┘    └─────────────────┘
+         │                       │                       │
+         │                       │                       │
+         ▼                       ▼                       ▼
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│   Auth System   │    │   Mock Services │    │   Static Files  │
+│   (Context API) │    │   (No Backend)  │    │   (Optimized)   │
+└─────────────────┘    └─────────────────┘    └─────────────────┘
+```
+
+#### **Casos de Uso Principales:**
+
+1. **Estudiante Accede a Clase en Vivo**
+   - Autenticación → Navegación → Selección de clase → Streaming → Chat
+
+2. **Profesor Inicia Transmisión**
+   - Login → Dashboard → Configuración → Inicio de stream → Monitoreo
+
+3. **Administrador Gestiona Contenido**
+   - Login → Panel admin → Gestión de usuarios → Configuración → Reportes
+
+4. **Usuario Busca Contenido**
+   - Búsqueda → Filtros → Resultados → Reproducción → Favoritos
+
+#### **Métricas de Rendimiento Objetivo:**
+- **Tiempo de Carga Inicial**: < 3 segundos
+- **Tiempo de Respuesta de API**: < 500ms
+- **Throughput**: 500+ usuarios simultáneos
+- **Disponibilidad**: 99.9% uptime
+- **Tiempo de Recuperación**: < 5 minutos
+
+#### **Consideraciones de Seguridad:**
+- **Autenticación JWT**: Tokens seguros para sesiones
+- **HTTPS**: Encriptación de datos en tránsito
+- **CORS**: Configuración de políticas de origen cruzado
+- **Validación**: Sanitización de inputs del usuario
+- **Headers de Seguridad**: CSP, XSS Protection, etc.
+
+#### **Estrategia de Despliegue:**
+- **Desarrollo**: Hot reload con Docker Compose
+- **Producción**: Multi-stage build optimizado
+- **Monitoreo**: Health checks y logging centralizado
+- **Escalabilidad**: Horizontal scaling con load balancer
+
+#### **Beneficios de la Implementación:**
+- **Para la Universidad**: Reducción de costos de infraestructura física
+- **Para los Estudiantes**: Acceso flexible y contenido bajo demanda
+- **Para los Profesores**: Herramientas avanzadas de enseñanza
+- **Para la Institución**: Escalabilidad y mantenimiento simplificado
+
+#### **Lecciones Aprendidas:**
+- **Containerización**: Simplifica el despliegue y la escalabilidad
+- **SPA Architecture**: Mejora la experiencia de usuario
+- **Mock Services**: Permite desarrollo frontend independiente
+- **Nginx Configuration**: Optimiza el rendimiento y la seguridad
+
+#### **Próximos Pasos del Proyecto:**
+1. **Fase 2**: Implementación de backend real (Node.js/Express)
+2. **Fase 3**: Integración con base de datos (PostgreSQL/MongoDB)
+3. **Fase 4**: Sistema de streaming real (WebRTC/RTMP)
+4. **Fase 5**: Análisis de datos y machine learning
+
+---
+
 ## 📋 Tabla de Contenidos
 
-1. [Prerrequisitos del Sistema](#prerrequisitos-del-sistema)
-2. [Instalación de Docker Desktop](#instalación-de-docker-desktop)
-3. [Verificación de la Instalación](#verificación-de-la-instalación)
-4. [Configuración del Proyecto](#configuración-del-proyecto)
-5. [Despliegue de la Aplicación](#despliegue-de-la-aplicación)
-6. [Comandos Útiles](#comandos-útiles)
-7. [Solución de Problemas](#solución-de-problemas)
-8. [Acceso a la Aplicación](#acceso-a-la-aplicación)
+1. [Estudio de Caso: Implementación de Plataforma de Streaming Educativo](#estudio-de-caso-implementación-de-plataforma-de-streaming-educativo)
+2. [Prerrequisitos del Sistema](#prerrequisitos-del-sistema)
+3. [Instalación de Docker Desktop](#instalación-de-docker-desktop)
+4. [Verificación de la Instalación](#verificación-de-la-instalación)
+5. [Configuración del Proyecto](#configuración-del-proyecto)
+6. [Despliegue de la Aplicación](#despliegue-de-la-aplicación)
+7. [Comandos Útiles](#comandos-útiles)
+8. [Solución de Problemas](#solución-de-problemas)
+9. [Acceso a la Aplicación](#acceso-a-la-aplicación)
 
 ---
 
@@ -555,5 +663,3 @@ Has configurado exitosamente Docker y desplegado la aplicación EduStreaming.
 ¡Disfruta de tu aplicación! 🚀
 
 ---
-
-*Esta guía fue generada automáticamente para el proyecto EduStreaming. Para más información, consulta la documentación del proyecto o contacta al equipo de desarrollo.*

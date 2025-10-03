@@ -9,6 +9,7 @@ import { Layout } from '../shared/components/Layout.jsx';
 import HomePage from '../modules/catalog/pages/HomePage.jsx';
 import LoginPage from '../modules/auth/pages/LoginPage.jsx';
 import RegisterPage from '../modules/auth/pages/RegisterPage.jsx';
+import ForgotPasswordPage from '../modules/auth/pages/ForgotPasswordPage.jsx';
 import DashboardPage from '../modules/admin/pages/DashboardPage.jsx';
 import LiveStreamPage from '../modules/live/pages/LiveStreamPage.jsx';
 import ClassroomPage from '../modules/classroom/pages/ClassroomPage.jsx';
@@ -16,6 +17,9 @@ import PlayerPage from '../modules/player/pages/PlayerPage.jsx';
 import ProfilePage from '../modules/auth/pages/ProfilePage.jsx';
 import SearchPage from '../modules/search/pages/SearchPage.jsx';
 import NotificationsPage from '../modules/notifications/pages/NotificationsPage.jsx';
+import MyCoursesPage from '../modules/learning/pages/MyCoursesPage.jsx';
+import HistoryPage from '../modules/learning/pages/HistoryPage.jsx';
+import FavoritesPage from '../modules/learning/pages/FavoritesPage.jsx';
 
 const AppContainer = styled.div`
   min-height: 100vh;
@@ -28,6 +32,7 @@ function App() {
       <Routes>
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
+        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
         <Route
           path="/"
           element={
@@ -123,7 +128,7 @@ function App() {
           element={
             <ProtectedRoute>
               <Layout>
-                <HomePage />
+                <MyCoursesPage />
               </Layout>
             </ProtectedRoute>
           }
@@ -133,7 +138,7 @@ function App() {
           element={
             <ProtectedRoute>
               <Layout>
-                <HomePage />
+                <HistoryPage />
               </Layout>
             </ProtectedRoute>
           }
@@ -143,7 +148,7 @@ function App() {
           element={
             <ProtectedRoute>
               <Layout>
-                <HomePage />
+                <FavoritesPage />
               </Layout>
             </ProtectedRoute>
           }
