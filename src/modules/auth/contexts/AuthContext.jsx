@@ -29,24 +29,18 @@ export const AuthProvider = ({ children }) => {
     const initAuth = async () => {
       try {
         console.log('Inicializando AuthContext...');
-        
-        // Para desarrollo, crear un usuario mockeado por defecto
-        const mockUser = {
-          id: 1,
-          name: 'María González',
-          email: 'maria.gonzalez@demo.com',
-          avatar: 'https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg?auto=compress&cs=tinysrgb&w=400',
-          roles: ['student'],
-          stats: {
-            totalClasses: 25,
-            hoursWatched: 120,
-            certificates: 5,
-            joinDate: '2023-01-15'
-          }
-        };
-        
-        console.log('Usuario mockeado creado:', mockUser);
-        dispatch({ type: 'SET_USER', payload: mockUser });
+        // No establecer usuario automáticamente. Respetar sesión previa si existe.
+        const existingToken = localStorage.getItem('auth_token');
+        if (!existingToken) {
+          // No hay sesión: marcar fin de carga para mostrar Login
+          dispatch({ type: 'SET_LOADING', payload: false });
+          return;
+        }
+
+        // Con token previo: intentar recuperar usuario mock de forma segura
+        // En entorno sin backend, no podemos validar el token, así que solo
+        // finalizamos la carga para permitir que flujos controlados manejen el estado.
+        dispatch({ type: 'SET_LOADING', payload: false });
       } catch (error) {
         console.error('Error en AuthContext:', error);
         dispatch({ type: 'SET_ERROR', payload: error.message });
