@@ -9,16 +9,20 @@ import { Footer } from './Footer.jsx';
 const LayoutContainer = styled(Box)`
   display: flex;
   min-height: 100vh;
-  background-color: #ffffff;
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
 `;
 
 const MainContent = styled(Box)`
   flex: 1;
   display: flex;
   flex-direction: column;
-  background-color: #f8f9fa;
-  margin-left: 240px; /* Compensar el ancho del sidebar */
+  background: transparent;
+  margin-left: 280px; /* Compensar el ancho del sidebar */
   min-height: 100vh;
+  
+  @media (max-width: 768px) {
+    margin-left: 0;
+  }
 `;
 
 const ContentArea = styled(Box)`
@@ -26,9 +30,12 @@ const ContentArea = styled(Box)`
   padding: 24px;
   overflow-y: auto;
   min-height: calc(100vh - 64px - 60px); /* Altura total - header - footer */
+  background: transparent;
 `;
 
 export const Layout = ({ children }) => {
+  console.log('Layout renderizando con children:', children);
+  
   return (
     <LayoutContainer>
       <Sidebar />

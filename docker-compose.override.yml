@@ -1,0 +1,29 @@
+# Configuración de override para desarrollo local
+# Este archivo se carga automáticamente por docker-compose
+
+services:
+  edustreaming:
+    # Configuración específica para desarrollo
+    environment:
+      - NODE_ENV=development
+      - DEBUG=true
+    volumes:
+      # Montar código fuente para hot reload (solo en desarrollo)
+      - .:/app
+      - /app/node_modules
+    ports:
+      - "3000:80"
+      - "9229:9229"  # Puerto para debugging de Node.js
+
+  edustreaming-dev:
+    # Configuración adicional para modo desarrollo
+    environment:
+      - NODE_ENV=development
+      - VITE_DEBUG=true
+      - VITE_API_URL=http://localhost:3000
+    volumes:
+      - .:/app
+      - /app/node_modules
+    ports:
+      - "5173:5173"
+      - "9229:9229"  # Puerto para debugging

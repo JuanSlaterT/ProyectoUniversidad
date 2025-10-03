@@ -14,6 +14,8 @@ import LiveStreamPage from '../modules/live/pages/LiveStreamPage.jsx';
 import ClassroomPage from '../modules/classroom/pages/ClassroomPage.jsx';
 import PlayerPage from '../modules/player/pages/PlayerPage.jsx';
 import ProfilePage from '../modules/auth/pages/ProfilePage.jsx';
+import SearchPage from '../modules/search/pages/SearchPage.jsx';
+import NotificationsPage from '../modules/notifications/pages/NotificationsPage.jsx';
 
 const AppContainer = styled.div`
   min-height: 100vh;
@@ -78,6 +80,86 @@ function App() {
         />
         <Route
           path="/profile"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <ProfilePage />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/search"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <SearchPage />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/notifications"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <NotificationsPage />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/profile/:userId"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <ProfilePage />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/my-courses"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <HomePage />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/history"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <HomePage />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/favorites"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <HomePage />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/chat"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <ClassroomPage />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/settings"
           element={
             <ProtectedRoute>
               <Layout>

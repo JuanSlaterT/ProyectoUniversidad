@@ -28,16 +28,28 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const initAuth = async () => {
       try {
-        const token = localStorage.getItem('auth_token');
-        if (token) {
-          const user = await authService.getCurrentUser();
-          dispatch({ type: 'SET_USER', payload: user });
-        } else {
-          dispatch({ type: 'SET_LOADING', payload: false });
-        }
+        console.log('Inicializando AuthContext...');
+        
+        // Para desarrollo, crear un usuario mockeado por defecto
+        const mockUser = {
+          id: 1,
+          name: 'María González',
+          email: 'maria.gonzalez@demo.com',
+          avatar: 'https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg?auto=compress&cs=tinysrgb&w=400',
+          roles: ['student'],
+          stats: {
+            totalClasses: 25,
+            hoursWatched: 120,
+            certificates: 5,
+            joinDate: '2023-01-15'
+          }
+        };
+        
+        console.log('Usuario mockeado creado:', mockUser);
+        dispatch({ type: 'SET_USER', payload: mockUser });
       } catch (error) {
+        console.error('Error en AuthContext:', error);
         dispatch({ type: 'SET_ERROR', payload: error.message });
-        localStorage.removeItem('auth_token');
       }
     };
 

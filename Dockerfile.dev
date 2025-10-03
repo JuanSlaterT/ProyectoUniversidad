@@ -1,0 +1,25 @@
+# Dockerfile para desarrollo de EduStreaming
+# Incluye hot reload y herramientas de desarrollo
+
+FROM node:18-alpine
+
+# Establecer directorio de trabajo
+WORKDIR /app
+
+# Instalar dependencias del sistema
+RUN apk add --no-cache git
+
+# Copiar archivos de dependencias
+COPY package*.json ./
+
+# Instalar todas las dependencias (incluyendo devDependencies)
+RUN npm install
+
+# Copiar código fuente
+COPY . .
+
+# Exponer puerto de desarrollo de Vite
+EXPOSE 5173
+
+# Comando para desarrollo con hot reload
+CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]
