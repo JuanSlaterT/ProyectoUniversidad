@@ -5,20 +5,10 @@ const RTC_CONFIG = {
   iceServers: [
     { urls: 'stun:stun.l.google.com:19302' },
     { urls: 'stun:stun1.l.google.com:19302' },
-    { urls: 'stun:stun2.l.google.com:19302' },
-    { urls: 'stun:stun3.l.google.com:19302' },
-    { urls: 'stun:stun4.l.google.com:19302' },
-    // Servidores adicionales para mejor conectividad global
-    { urls: 'stun:stun.ekiga.net' },
-    { urls: 'stun:stun.ideasip.com' },
-    { urls: 'stun:stun.schlund.de' },
-    { urls: 'stun:stun.stunprotocol.org:3478' },
-    { urls: 'stun:stun.voiparound.com' },
-    { urls: 'stun:stun.voipbuster.com' },
-    { urls: 'stun:stun.voipstunt.com' },
+    // Solo los más confiables para evitar problemas
   ],
-  iceCandidatePoolSize: 10, // Más candidatos ICE
-  iceTransportPolicy: 'all', // Permitir todos los transportes
+  iceCandidatePoolSize: 5, // Reducido para evitar problemas
+  iceTransportPolicy: 'all',
 };
 
 const waitIceComplete = (pc) => new Promise((res) => {
@@ -43,6 +33,9 @@ export default function ViewLivePage() {
 
   const createAnswer = async () => {
     setError('');
+    let connectionTimeout = null;
+    let isAnswerCreated = false;
+    
     try {
       const offer = JSON.parse(offerText);
       const pc = new RTCPeerConnection(RTC_CONFIG);
@@ -51,15 +44,21 @@ export default function ViewLivePage() {
       // Configurar eventos de conexión con mejor manejo
       pc.onconnectionstatechange = () => {
         console.log('Viewer - Connection state:', pc.connectionState);
+        
+        // Solo mostrar errores si ya se creó la answer
         if (pc.connectionState === 'connected') {
           setStatus('connected');
           setError('');
+          if (connectionTimeout) {
+            clearTimeout(connectionTimeout);
+            connectionTimeout = null;
+          }
         } else if (pc.connectionState === 'connecting') {
           setStatus('connecting');
-        } else if (pc.connectionState === 'failed') {
+        } else if (pc.connectionState === 'failed' && isAnswerCreated) {
           setStatus('failed');
           setError('Conexión falló - verifica la Offer');
-        } else if (pc.connectionState === 'disconnected') {
+        } else if (pc.connectionState === 'disconnected' && isAnswerCreated) {
           setStatus('disconnected');
           setError('Conexión perdida');
         }
@@ -67,17 +66,23 @@ export default function ViewLivePage() {
 
       pc.oniceconnectionstatechange = () => {
         console.log('Viewer - ICE connection state:', pc.iceConnectionState);
+        
+        // Solo mostrar errores si ya se creó la answer
         if (pc.iceConnectionState === 'connected' || pc.iceConnectionState === 'completed') {
           setStatus('connected');
           setError('');
+          if (connectionTimeout) {
+            clearTimeout(connectionTimeout);
+            connectionTimeout = null;
+          }
         } else if (pc.iceConnectionState === 'checking') {
           setStatus('connecting');
-        } else if (pc.iceConnectionState === 'failed') {
+        } else if (pc.iceConnectionState === 'failed' && isAnswerCreated) {
           setStatus('failed');
           setError('ICE falló - verifica la Offer');
-        } else if (pc.iceConnectionState === 'disconnected') {
-          setStatus('disconnected');
-          setError('ICE desconectado');
+        } else if (pc.iceConnectionState === 'disconnected' && isAnswerCreated) {
+          console.log('Viewer - ICE desconectado durante creación de answer (normal)');
+          // No mostrar error si aún no se creó la answer
         }
       };
 
@@ -94,23 +99,6 @@ export default function ViewLivePage() {
         }
       };
 
-      // Agregar timeout para la conexión
-      const connectionTimeout = setTimeout(() => {
-        if (pc.connectionState !== 'connected') {
-          console.log('Viewer - Timeout de conexión');
-          setError('Timeout: La conexión tardó demasiado (2 minutos)');
-        }
-      }, 120000); // 2 minutos timeout
-
-      // Limpiar timeout si se conecta
-      const originalOnConnectionChange = pc.onconnectionstatechange;
-      pc.onconnectionstatechange = () => {
-        if (originalOnConnectionChange) originalOnConnectionChange();
-        if (pc.connectionState === 'connected') {
-          clearTimeout(connectionTimeout);
-        }
-      };
-
       console.log('Viewer - Procesando Offer...');
       await pc.setRemoteDescription(offer);
       
@@ -123,8 +111,18 @@ export default function ViewLivePage() {
 
       setAnswerText(JSON.stringify(pc.localDescription));
       setStatus('answer-created');
+      isAnswerCreated = true; // Marcar que la answer ya se creó
       
       console.log('Viewer - Answer creada, esperando conexión...');
+      
+      // Configurar timeout DESPUÉS de crear la answer
+      connectionTimeout = setTimeout(() => {
+        if (pc.connectionState !== 'connected' && pc.iceConnectionState !== 'connected') {
+          console.log('Viewer - Timeout de conexión (2 minutos)');
+          setError('Timeout: La conexión tardó demasiado (2 minutos)');
+        }
+      }, 120000); // 2 minutos timeout
+      
     } catch (e) {
       setError('Offer inválida: ' + e.message);
     }

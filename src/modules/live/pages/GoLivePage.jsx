@@ -5,20 +5,10 @@ const RTC_CONFIG = {
   iceServers: [
     { urls: 'stun:stun.l.google.com:19302' },
     { urls: 'stun:stun1.l.google.com:19302' },
-    { urls: 'stun:stun2.l.google.com:19302' },
-    { urls: 'stun:stun3.l.google.com:19302' },
-    { urls: 'stun:stun4.l.google.com:19302' },
-    // Servidores adicionales para mejor conectividad global
-    { urls: 'stun:stun.ekiga.net' },
-    { urls: 'stun:stun.ideasip.com' },
-    { urls: 'stun:stun.schlund.de' },
-    { urls: 'stun:stun.stunprotocol.org:3478' },
-    { urls: 'stun:stun.voiparound.com' },
-    { urls: 'stun:stun.voipbuster.com' },
-    { urls: 'stun:stun.voipstunt.com' },
+    // Solo los más confiables para evitar problemas
   ],
-  iceCandidatePoolSize: 10, // Más candidatos ICE
-  iceTransportPolicy: 'all', // Permitir todos los transportes
+  iceCandidatePoolSize: 5, // Reducido para evitar problemas
+  iceTransportPolicy: 'all',
 };
 
 const waitIceComplete = (pc) => new Promise((res) => {
@@ -120,6 +110,8 @@ export default function GoLivePage() {
 
   const acceptAnswer = async () => {
     setError('');
+    let connectionTimeout = null;
+    
     try {
       const pc = pcRef.current;
       if (!pc) throw new Error('Primero crea la Offer');
@@ -127,10 +119,10 @@ export default function GoLivePage() {
       console.log('Host - Aceptando Answer...');
       const desc = JSON.parse(answerText);
       
-      // Agregar timeout para la conexión
-      const connectionTimeout = setTimeout(() => {
+      // Configurar timeout para la conexión
+      connectionTimeout = setTimeout(() => {
         if (pc.connectionState !== 'connected') {
-          console.log('Host - Timeout de conexión');
+          console.log('Host - Timeout de conexión (2 minutos)');
           setError('Timeout: La conexión tardó demasiado (2 minutos)');
         }
       }, 120000); // 2 minutos timeout
@@ -140,7 +132,10 @@ export default function GoLivePage() {
       pc.onconnectionstatechange = () => {
         if (originalOnConnectionChange) originalOnConnectionChange();
         if (pc.connectionState === 'connected') {
-          clearTimeout(connectionTimeout);
+          if (connectionTimeout) {
+            clearTimeout(connectionTimeout);
+            connectionTimeout = null;
+          }
         }
       };
       
