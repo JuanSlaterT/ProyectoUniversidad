@@ -17,6 +17,8 @@ const RTC_CONFIG = {
     { urls: 'stun:stun.voipbuster.com' },
     { urls: 'stun:stun.voipstunt.com' },
   ],
+  iceCandidatePoolSize: 10, // Más candidatos ICE
+  iceTransportPolicy: 'all', // Permitir todos los transportes
 };
 
 const waitIceComplete = (pc) => new Promise((res) => {
@@ -46,12 +48,18 @@ export default function ViewLivePage() {
       const pc = new RTCPeerConnection(RTC_CONFIG);
       pcRef.current = pc;
 
-      // Configurar eventos de conexión
+      // Configurar eventos de conexión con mejor manejo
       pc.onconnectionstatechange = () => {
         console.log('Viewer - Connection state:', pc.connectionState);
         if (pc.connectionState === 'connected') {
           setStatus('connected');
-        } else if (pc.connectionState === 'failed' || pc.connectionState === 'disconnected') {
+          setError('');
+        } else if (pc.connectionState === 'connecting') {
+          setStatus('connecting');
+        } else if (pc.connectionState === 'failed') {
+          setStatus('failed');
+          setError('Conexión falló - verifica la Offer');
+        } else if (pc.connectionState === 'disconnected') {
           setStatus('disconnected');
           setError('Conexión perdida');
         }
@@ -61,23 +69,62 @@ export default function ViewLivePage() {
         console.log('Viewer - ICE connection state:', pc.iceConnectionState);
         if (pc.iceConnectionState === 'connected' || pc.iceConnectionState === 'completed') {
           setStatus('connected');
+          setError('');
+        } else if (pc.iceConnectionState === 'checking') {
+          setStatus('connecting');
+        } else if (pc.iceConnectionState === 'failed') {
+          setStatus('failed');
+          setError('ICE falló - verifica la Offer');
+        } else if (pc.iceConnectionState === 'disconnected') {
+          setStatus('disconnected');
+          setError('ICE desconectado');
         }
       };
 
+      // Agregar evento para candidatos ICE
+      pc.onicecandidate = (event) => {
+        console.log('Viewer - ICE candidate:', event.candidate);
+      };
+
       pc.ontrack = (e) => {
+        console.log('Viewer - Received track:', e.track.kind);
         if (remoteVideoRef.current && e.streams[0]) {
           remoteVideoRef.current.srcObject = e.streams[0];
           remoteVideoRef.current.play().catch(() => {});
         }
       };
 
+      // Agregar timeout para la conexión
+      const connectionTimeout = setTimeout(() => {
+        if (pc.connectionState !== 'connected') {
+          console.log('Viewer - Timeout de conexión');
+          setError('Timeout: La conexión tardó demasiado');
+        }
+      }, 15000); // 15 segundos timeout
+
+      // Limpiar timeout si se conecta
+      const originalOnConnectionChange = pc.onconnectionstatechange;
+      pc.onconnectionstatechange = () => {
+        if (originalOnConnectionChange) originalOnConnectionChange();
+        if (pc.connectionState === 'connected') {
+          clearTimeout(connectionTimeout);
+        }
+      };
+
+      console.log('Viewer - Procesando Offer...');
       await pc.setRemoteDescription(offer);
+      
+      console.log('Viewer - Creando Answer...');
       const answer = await pc.createAnswer();
       await pc.setLocalDescription(answer);
+      
+      console.log('Viewer - Esperando ICE candidates...');
       await waitIceComplete(pc);
 
       setAnswerText(JSON.stringify(pc.localDescription));
       setStatus('answer-created');
+      
+      console.log('Viewer - Answer creada, esperando conexión...');
     } catch (e) {
       setError('Offer inválida: ' + e.message);
     }

@@ -17,6 +17,8 @@ const RTC_CONFIG = {
     { urls: 'stun:stun.voipbuster.com' },
     { urls: 'stun:stun.voipstunt.com' },
   ],
+  iceCandidatePoolSize: 10, // Más candidatos ICE
+  iceTransportPolicy: 'all', // Permitir todos los transportes
 };
 
 const waitIceComplete = (pc) => new Promise((res) => {
@@ -65,12 +67,18 @@ export default function GoLivePage() {
       const pc = new RTCPeerConnection(RTC_CONFIG);
       pcRef.current = pc;
 
-      // Configurar eventos de conexión
+      // Configurar eventos de conexión con mejor manejo
       pc.onconnectionstatechange = () => {
         console.log('Host - Connection state:', pc.connectionState);
         if (pc.connectionState === 'connected') {
           setStatus('connected');
-        } else if (pc.connectionState === 'failed' || pc.connectionState === 'disconnected') {
+          setError(''); // Limpiar errores cuando se conecta
+        } else if (pc.connectionState === 'connecting') {
+          setStatus('connecting');
+        } else if (pc.connectionState === 'failed') {
+          setStatus('failed');
+          setError('Conexión falló - verifica la Answer');
+        } else if (pc.connectionState === 'disconnected') {
           setStatus('disconnected');
           setError('Conexión perdida');
         }
@@ -80,7 +88,18 @@ export default function GoLivePage() {
         console.log('Host - ICE connection state:', pc.iceConnectionState);
         if (pc.iceConnectionState === 'connected' || pc.iceConnectionState === 'completed') {
           setStatus('connected');
+          setError(''); // Limpiar errores cuando se conecta
+        } else if (pc.iceConnectionState === 'checking') {
+          setStatus('connecting');
+        } else if (pc.iceConnectionState === 'failed') {
+          setStatus('failed');
+          setError('ICE falló - verifica la Answer');
         }
+      };
+
+      // Agregar evento para candidatos ICE
+      pc.onicecandidate = (event) => {
+        console.log('Host - ICE candidate:', event.candidate);
       };
 
       // publicar tracks locales
@@ -104,9 +123,31 @@ export default function GoLivePage() {
     try {
       const pc = pcRef.current;
       if (!pc) throw new Error('Primero crea la Offer');
+      
+      console.log('Host - Aceptando Answer...');
       const desc = JSON.parse(answerText);
+      
+      // Agregar timeout para la conexión
+      const connectionTimeout = setTimeout(() => {
+        if (pc.connectionState !== 'connected') {
+          console.log('Host - Timeout de conexión');
+          setError('Timeout: La conexión tardó demasiado');
+        }
+      }, 10000); // 10 segundos timeout
+      
+      // Limpiar timeout si se conecta
+      const originalOnConnectionChange = pc.onconnectionstatechange;
+      pc.onconnectionstatechange = () => {
+        if (originalOnConnectionChange) originalOnConnectionChange();
+        if (pc.connectionState === 'connected') {
+          clearTimeout(connectionTimeout);
+        }
+      };
+      
       await pc.setRemoteDescription(desc);
       setStatus('connecting');
+      
+      console.log('Host - Answer aceptada, esperando conexión...');
     } catch (e) {
       setError('Answer inválida: ' + e.message);
     }
