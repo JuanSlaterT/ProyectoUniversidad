@@ -98,9 +98,9 @@ export default function ViewLivePage() {
       const connectionTimeout = setTimeout(() => {
         if (pc.connectionState !== 'connected') {
           console.log('Viewer - Timeout de conexión');
-          setError('Timeout: La conexión tardó demasiado');
+          setError('Timeout: La conexión tardó demasiado (2 minutos)');
         }
-      }, 15000); // 15 segundos timeout
+      }, 120000); // 2 minutos timeout
 
       // Limpiar timeout si se conecta
       const originalOnConnectionChange = pc.onconnectionstatechange;

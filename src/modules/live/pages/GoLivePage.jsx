@@ -131,9 +131,9 @@ export default function GoLivePage() {
       const connectionTimeout = setTimeout(() => {
         if (pc.connectionState !== 'connected') {
           console.log('Host - Timeout de conexión');
-          setError('Timeout: La conexión tardó demasiado');
+          setError('Timeout: La conexión tardó demasiado (2 minutos)');
         }
-      }, 10000); // 10 segundos timeout
+      }, 120000); // 2 minutos timeout
       
       // Limpiar timeout si se conecta
       const originalOnConnectionChange = pc.onconnectionstatechange;
