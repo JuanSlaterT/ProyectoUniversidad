@@ -12,6 +12,8 @@ import RegisterPage from '../modules/auth/pages/RegisterPage.jsx';
 import ForgotPasswordPage from '../modules/auth/pages/ForgotPasswordPage.jsx';
 import DashboardPage from '../modules/admin/pages/DashboardPage.jsx';
 import LiveStreamPage from '../modules/live/pages/LiveStreamPage.jsx';
+import GoLivePage from '../modules/live/pages/GoLivePage.jsx';
+import ViewLivePage from '../modules/live/pages/ViewLivePage.jsx';
 import ClassroomPage from '../modules/classroom/pages/ClassroomPage.jsx';
 import PlayerPage from '../modules/player/pages/PlayerPage.jsx';
 import ProfilePage from '../modules/auth/pages/ProfilePage.jsx';
@@ -59,6 +61,26 @@ function App() {
             <ProtectedRoute>
               <Layout>
                 <LiveStreamPage />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/golive"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <GoLivePage />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/viewlive"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <ViewLivePage />
               </Layout>
             </ProtectedRoute>
           }

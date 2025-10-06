@@ -1,43 +1,13 @@
-// Servicio mockeado para chat
-export const chatService = {
-  // Conectar al chat de un stream
-  connectToChat: async (streamId) => {
-    await new Promise(resolve => setTimeout(resolve, 300));
-    
-    return {
-      success: true,
-      connectionId: `chat-${streamId}-${Date.now()}`,
-      message: 'Conectado al chat'
-    };
-  },
+// Chat mock con memoria + pub/sub
+const store = new Map();            // streamId -> ChatMsg[]
+const subs  = new Map();            // streamId -> Set(callback)
 
-  // Desconectar del chat
-  disconnectFromChat: async (connectionId) => {
-    await new Promise(resolve => setTimeout(resolve, 200));
-    
-    return {
-      success: true,
-      message: 'Desconectado del chat'
-    };
-  },
+const wait = (ms) => new Promise(r => setTimeout(r, ms));
 
-  // Enviar mensaje
-  sendMessage: async (streamId, message, userId) => {
-    await new Promise(resolve => setTimeout(resolve, 100));
-    
-    return {
-      success: true,
-      messageId: Date.now(),
-      timestamp: new Date().toISOString(),
-      message: 'Mensaje enviado correctamente'
-    };
-  },
-
-  // Obtener mensajes del chat
-  getChatMessages: async (streamId, limit = 50) => {
-    await new Promise(resolve => setTimeout(resolve, 200));
-    
-    const mockMessages = [
+function ensureStream(streamId) {
+  const id = Number(streamId);
+  if (!store.has(id)) {
+    store.set(id, [
       {
         id: 1,
         user: 'María González',
@@ -112,14 +82,72 @@ export const chatService = {
         isModerator: false,
         avatar: 'https://images.pexels.com/photos/1040880/pexels-photo-1040880.jpeg?auto=compress&cs=tinysrgb&w=400'
       }
-    ];
-    
-    return mockMessages.slice(0, limit);
+    ]);
+  }
+  if (!subs.has(id)) subs.set(id, new Set());
+  return id;
+}
+
+function broadcast(streamId, msg) {
+  const set = subs.get(streamId);
+  if (!set) return;
+  for (const cb of set) cb(msg);
+}
+
+export const chatService = {
+  // Conectar (simulado)
+  connectToChat: async (streamId) => {
+    const id = ensureStream(streamId);
+    await wait(300);
+    return {
+      success: true,
+      connectionId: `chat-${id}-${Date.now()}`,
+      message: 'Conectado al chat'
+    };
   },
 
-  // Suscribirse a nuevos mensajes (simulado)
+  // Desconectar (simulado)
+  disconnectFromChat: async (_connectionId) => {
+    await wait(200);
+    return { success: true, message: 'Desconectado del chat' };
+  },
+
+  // Enviar mensaje -> guarda y notifica suscriptores
+  // Nota: puedes pasar 4to parámetro opcional userName para mostrar distinto del userId
+  sendMessage: async (streamId, text, userId = 'current-user', userName) => {
+    const id = ensureStream(streamId);
+    await wait(100);
+
+    const now = new Date();
+    const msg = {
+      id: Date.now(),
+      user: userName || userId || 'Usuario',
+      userId: userId || 'anon',
+      message: text,
+      timestamp: now.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+      isModerator: false,
+      avatar: `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(userName || userId || 'U')}`,
+    };
+
+    store.get(id).push(msg);
+    broadcast(id, msg);
+    return msg; // por si quieres loguear/telemetría
+  },
+
+  // Obtener histórico
+  getChatMessages: async (streamId, limit = 50) => {
+    const id = ensureStream(streamId);
+    await wait(200);
+    const arr = store.get(id);
+    return arr.slice(-limit);
+  },
+
+  // Suscripción a nuevos mensajes
   subscribeToMessages: (streamId, callback) => {
-    // Simular mensajes en tiempo real
+    const id = ensureStream(streamId);
+    subs.get(id).add(callback);
+
+    // Bot simulador (5–15s)
     const interval = setInterval(() => {
       const randomMessages = [
         '¡Muy interesante!',
@@ -130,22 +158,25 @@ export const chatService = {
         'Muy clara la explicación',
         '¿Podrías repetir el último ejemplo?'
       ];
-      
-      const randomUser = ['Ana', 'Carlos', 'María', 'Luis', 'Sofia', 'Diego', 'Elena'][Math.floor(Math.random() * 7)];
-      const randomMessage = randomMessages[Math.floor(Math.random() * randomMessages.length)];
-      
-      const newMessage = {
+      const users = ['Ana', 'Carlos', 'María', 'Luis', 'Sofia', 'Diego', 'Elena'];
+      const user = users[Math.floor(Math.random() * users.length)];
+      const bot = {
         id: Date.now(),
-        user: randomUser,
+        user,
         userId: `user-${Math.floor(Math.random() * 100)}`,
-        message: randomMessage,
+        message: randomMessages[Math.floor(Math.random() * randomMessages.length)],
         timestamp: new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
-        isModerator: Math.random() > 0.9
+        isModerator: Math.random() > 0.9,
+        avatar: `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(user)}`,
       };
-      
-      callback(newMessage);
-    }, 5000 + Math.random() * 10000); // Entre 5-15 segundos
-    
-    return () => clearInterval(interval);
+      store.get(id).push(bot);
+      callback(bot);
+    }, 5000 + Math.random() * 10000);
+
+    // Unsubscribe
+    return () => {
+      subs.get(id)?.delete(callback);
+      clearInterval(interval);
+    };
   }
-}; 
+};

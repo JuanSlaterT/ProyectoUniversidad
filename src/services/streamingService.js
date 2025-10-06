@@ -1,4 +1,5 @@
 // Servicio mockeado para streaming
+import { STREAMS } from "../data/streams";
 export const streamingService = {
   // Obtener streams en vivo
   getLiveStreams: async () => {
@@ -246,25 +247,30 @@ export const streamingService = {
 
   // Obtener detalles de un stream específico
   getStreamDetails: async (streamId) => {
-    await new Promise(resolve => setTimeout(resolve, 300));
-    
-    const mockStream = {
-      id: parseInt(streamId),
-      title: 'Matemáticas Avanzadas - Cálculo Integral',
-      teacher: 'Prof. María González',
-      description: 'En esta clase revisaremos los conceptos fundamentales del cálculo integral, incluyendo técnicas de integración y aplicaciones prácticas.',
-      category: 'Matemáticas',
-      startTime: '14:00',
-      estimatedDuration: '2:30:00',
-      viewers: 245,
-      isLive: true,
-      streamUrl: 'mock-stream-url-' + streamId,
-      quality: ['360p', '720p', '1080p'],
+    await new Promise((r) => setTimeout(r, 300)); // simula red
+    const id = Number(streamId);
+    const keys = Object.keys(STREAMS).map(Number);
+    const pick =
+      STREAMS[id] ?? STREAMS[keys[(id - 1) % keys.length]];
+
+    // Determinar protocolo basado en el streamId
+    const protocol = streamId === 'webrtc-1' || streamId === 'webrtc-2' ? 'webrtc' : 'hls';
+
+    return {
+      ...pick,
+      protocol: protocol,
+      hlsUrl: protocol === 'hls' ? `https://demo.unified-streaming.com/k8s/features/stable/video/tears-of-steel/tears-of-steel.ism/.m3u8` : null,
+      webrtcStream: protocol === 'webrtc' ? null : null, // Se establecerá dinámicamente
+      quality: ["360p", "720p", "1080p"],
       chatEnabled: true,
-      recordingEnabled: true
+      recordingEnabled: true,
+      interactiveFeatures: {
+        polls: true,
+        qa: true,
+        handRaise: true,
+        breakoutRooms: false
+      }
     };
-    
-    return mockStream;
   },
 
   // Iniciar stream
