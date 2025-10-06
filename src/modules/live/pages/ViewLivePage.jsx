@@ -1,10 +1,21 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { Box, Paper, Button, TextField, Typography } from '@mui/material';
 
 const RTC_CONFIG = {
   iceServers: [
     { urls: 'stun:stun.l.google.com:19302' },
     { urls: 'stun:stun1.l.google.com:19302' },
+    { urls: 'stun:stun2.l.google.com:19302' },
+    { urls: 'stun:stun3.l.google.com:19302' },
+    { urls: 'stun:stun4.l.google.com:19302' },
+    // Servidores adicionales para mejor conectividad global
+    { urls: 'stun:stun.ekiga.net' },
+    { urls: 'stun:stun.ideasip.com' },
+    { urls: 'stun:stun.schlund.de' },
+    { urls: 'stun:stun.stunprotocol.org:3478' },
+    { urls: 'stun:stun.voiparound.com' },
+    { urls: 'stun:stun.voipbuster.com' },
+    { urls: 'stun:stun.voipstunt.com' },
   ],
 };
 
@@ -35,6 +46,24 @@ export default function ViewLivePage() {
       const pc = new RTCPeerConnection(RTC_CONFIG);
       pcRef.current = pc;
 
+      // Configurar eventos de conexión
+      pc.onconnectionstatechange = () => {
+        console.log('Viewer - Connection state:', pc.connectionState);
+        if (pc.connectionState === 'connected') {
+          setStatus('connected');
+        } else if (pc.connectionState === 'failed' || pc.connectionState === 'disconnected') {
+          setStatus('disconnected');
+          setError('Conexión perdida');
+        }
+      };
+
+      pc.oniceconnectionstatechange = () => {
+        console.log('Viewer - ICE connection state:', pc.iceConnectionState);
+        if (pc.iceConnectionState === 'connected' || pc.iceConnectionState === 'completed') {
+          setStatus('connected');
+        }
+      };
+
       pc.ontrack = (e) => {
         if (remoteVideoRef.current && e.streams[0]) {
           remoteVideoRef.current.srcObject = e.streams[0];
@@ -57,6 +86,16 @@ export default function ViewLivePage() {
   const copy = async (txt) => {
     try { await navigator.clipboard.writeText(txt); } catch {}
   };
+
+  const stopAll = () => {
+    try { pcRef.current && pcRef.current.close(); } catch {}
+    pcRef.current = null;
+    setStatus('idle');
+    setOfferText('');
+    setAnswerText('');
+  };
+
+  useEffect(() => () => stopAll(), []);
 
   return (
     <Box sx={{ p: 2, maxWidth: 900, mx: 'auto' }}>

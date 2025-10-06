@@ -5,6 +5,17 @@ const RTC_CONFIG = {
   iceServers: [
     { urls: 'stun:stun.l.google.com:19302' },
     { urls: 'stun:stun1.l.google.com:19302' },
+    { urls: 'stun:stun2.l.google.com:19302' },
+    { urls: 'stun:stun3.l.google.com:19302' },
+    { urls: 'stun:stun4.l.google.com:19302' },
+    // Servidores adicionales para mejor conectividad global
+    { urls: 'stun:stun.ekiga.net' },
+    { urls: 'stun:stun.ideasip.com' },
+    { urls: 'stun:stun.schlund.de' },
+    { urls: 'stun:stun.stunprotocol.org:3478' },
+    { urls: 'stun:stun.voiparound.com' },
+    { urls: 'stun:stun.voipbuster.com' },
+    { urls: 'stun:stun.voipstunt.com' },
   ],
 };
 
@@ -54,6 +65,24 @@ export default function GoLivePage() {
       const pc = new RTCPeerConnection(RTC_CONFIG);
       pcRef.current = pc;
 
+      // Configurar eventos de conexión
+      pc.onconnectionstatechange = () => {
+        console.log('Host - Connection state:', pc.connectionState);
+        if (pc.connectionState === 'connected') {
+          setStatus('connected');
+        } else if (pc.connectionState === 'failed' || pc.connectionState === 'disconnected') {
+          setStatus('disconnected');
+          setError('Conexión perdida');
+        }
+      };
+
+      pc.oniceconnectionstatechange = () => {
+        console.log('Host - ICE connection state:', pc.iceConnectionState);
+        if (pc.iceConnectionState === 'connected' || pc.iceConnectionState === 'completed') {
+          setStatus('connected');
+        }
+      };
+
       // publicar tracks locales
       streamRef.current.getTracks().forEach((t) => pc.addTrack(t, streamRef.current));
 
@@ -77,7 +106,7 @@ export default function GoLivePage() {
       if (!pc) throw new Error('Primero crea la Offer');
       const desc = JSON.parse(answerText);
       await pc.setRemoteDescription(desc);
-      setStatus('connected');
+      setStatus('connecting');
     } catch (e) {
       setError('Answer inválida: ' + e.message);
     }
@@ -125,7 +154,7 @@ export default function GoLivePage() {
         <video ref={localVideoRef} style={{ width: '100%', borderRadius: 8, background:'#000' }} playsInline autoPlay />
         <Stack direction="row" spacing={1} sx={{ mt: 2, flexWrap: 'wrap' }}>
           <Button variant="contained" onClick={startCamera}>1) Iniciar cámara</Button>
-          <Button variant="contained" onClick={createOffer} disabled={status === 'offer-created' || status === 'connected'}>
+          <Button variant="contained" onClick={createOffer} disabled={status === 'offer-created' || status === 'connected' || status === 'connecting'}>
             2) Crear Offer
           </Button>
           <Button variant="outlined" onClick={shareScreen} disabled={!pcRef.current}>Compartir pantalla</Button>
