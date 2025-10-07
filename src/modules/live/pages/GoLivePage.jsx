@@ -5,9 +5,8 @@ const RTC_CONFIG = {
   iceServers: [
     { urls: 'stun:stun.l.google.com:19302' },
     { urls: 'stun:stun1.l.google.com:19302' },
-    // Solo los más confiables para evitar problemas
   ],
-  iceCandidatePoolSize: 5, // Reducido para evitar problemas
+  iceCandidatePoolSize: 5,
   iceTransportPolicy: 'all',
 };
 
@@ -89,7 +88,11 @@ export default function GoLivePage() {
 
       // Agregar evento para candidatos ICE
       pc.onicecandidate = (event) => {
-        console.log('Host - ICE candidate:', event.candidate);
+        if (event.candidate) {
+          console.log('Host - ICE candidate:', event.candidate.candidate);
+        } else {
+          console.log('Host - ICE gathering complete');
+        }
       };
 
       // publicar tracks locales

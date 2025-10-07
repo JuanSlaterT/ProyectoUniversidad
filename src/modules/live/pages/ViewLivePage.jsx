@@ -3,11 +3,36 @@ import { Box, Paper, Button, TextField, Typography } from '@mui/material';
 
 const RTC_CONFIG = {
   iceServers: [
+    { urls: 'stun:stun.cloudflare.com:3478' },
     { urls: 'stun:stun.l.google.com:19302' },
-    { urls: 'stun:stun1.l.google.com:19302' },
-    // Solo los más confiables para evitar problemas
+    { urls: 'stun:global.stun.twilio.com:3478' },
+    { urls: 'stun:stun.relay.metered.ca:80' },
+    { urls: 'stun:stun.relay.metered.ca:3478' },
+    {
+      urls: "stun:stun.relay.metered.ca:80",
+    },
+    {
+      urls: "turn:standard.relay.metered.ca:80",
+      username: "5ba02db1dfc79ad9e5e149a9",
+      credential: "sVQXYgfjx8X7Yns+",
+    },
+    {
+      urls: "turn:standard.relay.metered.ca:80?transport=tcp",
+      username: "5ba02db1dfc79ad9e5e149a9",
+      credential: "sVQXYgfjx8X7Yns+",
+    },
+    {
+      urls: "turn:standard.relay.metered.ca:443",
+      username: "5ba02db1dfc79ad9e5e149a9",
+      credential: "sVQXYgfjx8X7Yns+",
+    },
+    {
+      urls: "turns:standard.relay.metered.ca:443?transport=tcp",
+      username: "5ba02db1dfc79ad9e5e149a9",
+      credential: "sVQXYgfjx8X7Yns+",
+    },
   ],
-  iceCandidatePoolSize: 5, // Reducido para evitar problemas
+  iceCandidatePoolSize: 5,
   iceTransportPolicy: 'all',
 };
 
@@ -35,7 +60,7 @@ export default function ViewLivePage() {
     setError('');
     let connectionTimeout = null;
     let isAnswerCreated = false;
-    
+
     try {
       const offer = JSON.parse(offerText);
       const pc = new RTCPeerConnection(RTC_CONFIG);
@@ -44,7 +69,7 @@ export default function ViewLivePage() {
       // Configurar eventos de conexión con mejor manejo
       pc.onconnectionstatechange = () => {
         console.log('Viewer - Connection state:', pc.connectionState);
-        
+
         // Solo mostrar errores si ya se creó la answer
         if (pc.connectionState === 'connected') {
           setStatus('connected');
@@ -66,7 +91,7 @@ export default function ViewLivePage() {
 
       pc.oniceconnectionstatechange = () => {
         console.log('Viewer - ICE connection state:', pc.iceConnectionState);
-        
+
         // Solo mostrar errores si ya se creó la answer
         if (pc.iceConnectionState === 'connected' || pc.iceConnectionState === 'completed') {
           setStatus('connected');
@@ -88,33 +113,37 @@ export default function ViewLivePage() {
 
       // Agregar evento para candidatos ICE
       pc.onicecandidate = (event) => {
-        console.log('Viewer - ICE candidate:', event.candidate);
+        if (event.candidate) {
+          console.log('Viewer - ICE candidate:', event.candidate.candidate);
+        } else {
+          console.log('Viewer - ICE gathering complete');
+        }
       };
 
       pc.ontrack = (e) => {
         console.log('Viewer - Received track:', e.track.kind);
         if (remoteVideoRef.current && e.streams[0]) {
           remoteVideoRef.current.srcObject = e.streams[0];
-          remoteVideoRef.current.play().catch(() => {});
+          remoteVideoRef.current.play().catch(() => { });
         }
       };
 
       console.log('Viewer - Procesando Offer...');
       await pc.setRemoteDescription(offer);
-      
+
       console.log('Viewer - Creando Answer...');
       const answer = await pc.createAnswer();
       await pc.setLocalDescription(answer);
-      
+
       console.log('Viewer - Esperando ICE candidates...');
       await waitIceComplete(pc);
 
       setAnswerText(JSON.stringify(pc.localDescription));
       setStatus('answer-created');
       isAnswerCreated = true; // Marcar que la answer ya se creó
-      
+
       console.log('Viewer - Answer creada, esperando conexión...');
-      
+
       // Configurar timeout DESPUÉS de crear la answer
       connectionTimeout = setTimeout(() => {
         if (pc.connectionState !== 'connected' && pc.iceConnectionState !== 'connected') {
@@ -122,18 +151,18 @@ export default function ViewLivePage() {
           setError('Timeout: La conexión tardó demasiado (2 minutos)');
         }
       }, 120000); // 2 minutos timeout
-      
+
     } catch (e) {
       setError('Offer inválida: ' + e.message);
     }
   };
 
   const copy = async (txt) => {
-    try { await navigator.clipboard.writeText(txt); } catch {}
+    try { await navigator.clipboard.writeText(txt); } catch { }
   };
 
   const stopAll = () => {
-    try { pcRef.current && pcRef.current.close(); } catch {}
+    try { pcRef.current && pcRef.current.close(); } catch { }
     pcRef.current = null;
     setStatus('idle');
     setOfferText('');
@@ -147,7 +176,7 @@ export default function ViewLivePage() {
       <Typography variant="h5" gutterBottom>Viewer (WebRTC)</Typography>
 
       <Paper sx={{ p: 2, mb: 2 }}>
-        <video ref={remoteVideoRef} style={{ width: '100%', borderRadius: 8, background:'#000' }} playsInline autoPlay />
+        <video ref={remoteVideoRef} style={{ width: '100%', borderRadius: 8, background: '#000' }} playsInline autoPlay />
         <Typography variant="body2" sx={{ mt: 2, color: 'text.secondary' }}>Estado: {status}</Typography>
         {error && <Typography color="error" sx={{ mt: 1 }}>{error}</Typography>}
       </Paper>
