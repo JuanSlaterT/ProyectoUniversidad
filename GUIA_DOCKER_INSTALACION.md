@@ -1,15 +1,15 @@
-<div align="center">
+<div align="center" style="font-size: 18px;">
 
-<h1>EduStreaming</h1>
-<h2>Guía de Instalación y Despliegue con Docker</h2>
+<h1 style="font-size: 28px;">EduStreaming</h1>
+<h2 style="font-size: 24px;">Guía de Instalación y Despliegue con Docker</h2>
 
-<p>Plataforma web para transmisión de clases en vivo y bajo demanda para entornos educativos. Esta guía explica cómo instalar Docker Desktop y desplegar la aplicación en desarrollo y producción usando Docker y Docker Compose.</p>
+<p style="font-size: 18px;">Plataforma web para transmisión de clases en vivo y bajo demanda para entornos educativos. Esta guía explica cómo instalar Docker Desktop y desplegar la aplicación en desarrollo y producción usando Docker y Docker Compose.</p>
 
-<p><strong>Versión:</strong> 1.0 &nbsp;|&nbsp; <strong>Fecha:</strong> 2025-10-06</p>
-<p><strong>Proyecto:</strong> EduStreaming</p>
+<p style="font-size: 18px;"><strong>Versión:</strong> 1.0 &nbsp;|&nbsp; <strong>Fecha:</strong> 2025-10-06</p>
+<p style="font-size: 18px;"><strong>Proyecto:</strong> EduStreaming</p>
 
-<h3>Integrantes</h3>
-<p>
+<h3 style="font-size: 22px;">Integrantes</h3>
+<p style="font-size: 18px;">
 Canchingre Tamayo Neil Aldhair<br>
 Castillo Gonzales Ximena Nohemí<br>
 Morales Torres Wilfrido Israel<br>
@@ -99,414 +99,380 @@ Notas de arquitectura:
 
 #### **Métricas de Rendimiento Objetivo:**
 - **Tiempo de Carga Inicial**: < 3 segundos
-- **Tiempo de Respuesta de API**: < 500ms
-- **Throughput**: 500+ usuarios simultáneos
+- **Tiempo de Respuesta API**: < 500ms
+- **Calidad de Video**: 720p mínimo, 1080p recomendado
+- **Latencia de Streaming**: < 5 segundos
 - **Disponibilidad**: 99.9% uptime
-- **Tiempo de Recuperación**: < 5 minutos
-
-#### **Consideraciones de Seguridad:**
-- **Autenticación JWT**: Tokens seguros para sesiones
-- **HTTPS**: Encriptación de datos en tránsito
-- **CORS**: Configuración de políticas de origen cruzado
-- **Validación**: Sanitización de inputs del usuario
-- **Headers de Seguridad**: CSP, XSS Protection, etc.
-
-#### **Estrategia de Despliegue:**
-- **Desarrollo**: Hot reload con Docker Compose
-- **Producción**: Multi-stage build optimizado
-- **Monitoreo**: Health checks y logging centralizado
-- **Escalabilidad**: Horizontal scaling con load balancer
-
-#### **Beneficios de la Implementación:**
-- **Para la Universidad**: Reducción de costos de infraestructura física
-- **Para los Estudiantes**: Acceso flexible y contenido bajo demanda
-- **Para los Profesores**: Herramientas avanzadas de enseñanza
-- **Para la Institución**: Escalabilidad y mantenimiento simplificado
-
-#### **Lecciones Aprendidas:**
-- **Containerización**: Simplifica el despliegue y la escalabilidad
-- **SPA Architecture**: Mejora la experiencia de usuario
-- **Mock Services**: Permite desarrollo frontend independiente
-- **Nginx Configuration**: Optimiza el rendimiento y la seguridad
-
-#### **Próximos Pasos del Proyecto:**
-1. **Fase 2**: Implementación de backend real (Node.js/Express)
-2. **Fase 3**: Integración con base de datos (PostgreSQL/MongoDB)
-3. **Fase 4**: Sistema de streaming real (WebRTC/RTMP)
-4. **Fase 5**: Análisis de datos y machine learning
+- **Concurrencia**: 500+ usuarios simultáneos
 
 ---
 
 ## Tabla de Contenidos
 
-1. [Estudio de Caso: Implementación de Plataforma de Streaming Educativo](#estudio-de-caso-implementación-de-plataforma-de-streaming-educativo)
-2. [Prerrequisitos del Sistema](#prerrequisitos-del-sistema)
-3. [Instalación de Docker Desktop](#instalación-de-docker-desktop)
-4. [Verificación de la Instalación](#verificación-de-la-instalación)
-5. [Despliegue en Vercel](#despliegue-en-vercel)
-6. [Configuración del Proyecto](#configuración-del-proyecto)
-7. [Despliegue de la Aplicación](#despliegue-de-la-aplicación)
-8. [Comandos Útiles](#comandos-útiles)
-9. [Acceso a la Aplicación](#acceso-a-la-aplicación)
+1. [Prerrequisitos](#prerrequisitos)
+2. [Instalación de Docker Desktop](#instalación-de-docker-desktop)
+3. [Despliegue en Vercel](#despliegue-en-vercel)
+4. [Configuración del Proyecto](#configuración-del-proyecto)
+5. [Despliegue en Desarrollo](#despliegue-en-desarrollo)
+6. [Despliegue en Producción](#despliegue-en-producción)
+7. [Comandos Útiles de Docker](#comandos-útiles-de-docker)
+8. [Consideraciones para Producción](#consideraciones-para-producción)
 
 ---
 
-## Prerrequisitos del Sistema
+## Prerrequisitos
 
-### Requisitos Mínimos:
-- **Sistema Operativo**: Windows 10/11
-- **RAM**: Mínimo 4GB (Recomendado: 8GB+)
-- **Espacio en Disco**: 2GB libres
+### Sistema Operativo
+- **Windows 10/11** (versión 1903 o superior)
+- **RAM**: Mínimo 4GB, recomendado 8GB
+- **Espacio en disco**: 2GB libres
 - **Procesador**: 64-bit con soporte para virtualización
-- **Conexión a Internet**: Para descargar imágenes de Docker
 
-### Verificar Virtualización:
-- **Windows**: Verificar que Hyper-V esté habilitado
+### Software Requerido
+- **Docker Desktop** (se instalará en esta guía)
+- **Git** (para clonar el repositorio)
+- **Navegador web** (Chrome, Firefox, Edge)
+
+### Cuenta de GitHub
+- Cuenta de GitHub activa para acceder al repositorio del proyecto
+- Permisos de lectura en el repositorio EduStreaming
 
 ---
 
 ## Instalación de Docker Desktop
 
-#### Paso 1: Descargar Docker Desktop
-1. Visita: https://www.docker.com/products/docker-desktop/
-2. Haz clic en "Download for Windows"
-3. Descarga el archivo `Docker Desktop Installer.exe`
+### Paso 1: Descargar Docker Desktop
 
-#### Paso 2: Instalar Docker Desktop
-1. **Ejecutar como Administrador**: Haz clic derecho en el instalador y selecciona "Ejecutar como administrador"
-2. **Aceptar términos**: Marca la casilla "I accept the terms" y haz clic en "Install"
-3. **Configuración inicial**:
-   - Use WSL 2 instead of Hyper-V (recomendado)
-   - Add shortcut to desktop
-   - Use Windows containers for Linux containers
+1. **Abrir navegador web** y navegar a: https://www.docker.com/products/docker-desktop/
+2. **Hacer clic** en "Download for Windows"
+3. **Esperar** a que se complete la descarga (archivo .exe de aproximadamente 500MB)
 
-#### Paso 3: Reiniciar el Sistema
-- Reinicia tu computadora cuando se solicite
-- Esto es necesario para que los cambios de virtualización tomen efecto
+### Paso 2: Instalar Docker Desktop
 
-#### Paso 4: Configurar Docker Desktop
-1. **Abrir Docker Desktop**: Busca "Docker Desktop" en el menú inicio
-2. **Aceptar términos de servicio**: Lee y acepta los términos
-3. **Configuración de recursos**:
-   - Ve a Settings → Resources
-   - **Memory**: Asigna al menos 4GB (recomendado: 6-8GB)
-   - **CPUs**: Asigna al menos 2 cores
-   - **Disk image size**: Al menos 60GB
+1. **Ejecutar** el archivo descargado como administrador
+2. **Aceptar** los términos de licencia
+3. **Seleccionar** "Use WSL 2 instead of Hyper-V" (recomendado)
+4. **Hacer clic** en "Install"
+5. **Esperar** a que se complete la instalación (5-10 minutos)
+6. **Reiniciar** el sistema cuando se solicite
 
----
+### Paso 3: Configurar Docker Desktop
 
-## Verificación de la Instalación
+1. **Abrir** Docker Desktop desde el menú de inicio
+2. **Aceptar** el acuerdo de servicio
+3. **Configurar** la cuenta Docker (opcional, se puede omitir)
+4. **Esperar** a que Docker se inicie completamente (ícono verde en la bandeja del sistema)
 
-### Verificar Docker Engine:
-```bash
-docker --version
-# Debería mostrar: Docker version 24.x.x, build xxxxx
-```
+### Paso 4: Verificar la Instalación
 
-### Verificar Docker Compose:
-```bash
-docker-compose --version
-# Debería mostrar: Docker Compose version v2.x.x
-```
-
-### Verificar que Docker esté funcionando:
-```bash
-docker run hello-world
-# Debería mostrar: "Hello from Docker!"
-```
-
-### Verificar Docker Desktop:
-1. Abre Docker Desktop
-2. Verifica que el estado sea "Running" (Verde)
-3. Ve a la pestaña "Images" - debería estar vacía inicialmente
+1. **Abrir** PowerShell o Command Prompt
+2. **Ejecutar** el siguiente comando:
+   ```bash
+   docker --version
+   ```
+3. **Verificar** que se muestre la versión de Docker
+4. **Ejecutar** el siguiente comando:
+   ```bash
+   docker-compose --version
+   ```
+5. **Confirmar** que Docker Compose esté instalado
 
 ---
 
 ## Despliegue en Vercel
 
-### ¿Qué es Vercel?
+### ¿Por qué Vercel?
 
-Vercel es una plataforma de despliegue que permite desplegar aplicaciones web de forma rápida y sencilla. Es especialmente útil para aplicaciones React, Next.js y otros frameworks modernos. Vercel se integra directamente con GitHub para hacer despliegues automáticos cada vez que actualices tu código.
+Vercel es la plataforma elegida para el despliegue del frontend de EduStreaming por las siguientes razones:
 
-### Paso 1: Crear Cuenta en Vercel
+#### **Simplicidad y Facilidad de Uso:**
+- **Integración directa con GitHub**: Despliegue automático con cada push
+- **Configuración mínima**: No requiere configuración compleja de servidores
+- **Interfaz intuitiva**: Dashboard fácil de usar para monitoreo
 
-1. **Visitar Vercel**: Ve a https://vercel.com
-2. **Registrarse**: Haz clic en "Sign Up" en la esquina superior derecha
-3. **Elegir método de registro**: Selecciona "Continue with GitHub" para vincular directamente tu cuenta de GitHub
-4. **Autorizar Vercel**: Permite que Vercel acceda a tu cuenta de GitHub
+#### **Optimización para Frontend:**
+- **CDN global**: Entrega de contenido desde servidores cercanos al usuario
+- **Optimización automática**: Compresión, minificación y caching automático
+- **Edge Functions**: Ejecución de código en el edge para mejor rendimiento
 
-### Paso 2: Preparar el Repositorio en GitHub
+#### **Integración con GitHub:**
+- **Deploy automático**: Cada commit se despliega automáticamente
+- **Preview deployments**: Versiones de prueba para cada pull request
+- **Rollback fácil**: Reversión a versiones anteriores con un clic
 
-1. **Crear repositorio**: En GitHub, crea un nuevo repositorio llamado `edustreaming` (o el nombre que prefieras)
-2. **Subir código**: Sube todo el código de tu proyecto al repositorio
-3. **Verificar estructura**: Asegúrate de que el repositorio contenga:
-   - `package.json` con las dependencias
-   - `src/` con el código fuente
-   - `public/` con archivos estáticos
-   - `vite.config.js` para la configuración
+#### **Costo y Mantenimiento:**
+- **Plan gratuito generoso**: Suficiente para proyectos educativos
+- **Sin mantenimiento de servidor**: Vercel maneja toda la infraestructura
+- **Escalabilidad automática**: Se adapta al tráfico sin configuración adicional
 
-### Paso 3: Conectar Vercel con GitHub
+#### **Comparación con AWS:**
+- **AWS**: Requiere configuración de EC2, Load Balancers, CloudFront, etc.
+- **Vercel**: Configuración en minutos vs horas/días en AWS
+- **Costo**: Plan gratuito vs costos variables en AWS
+- **Mantenimiento**: Cero vs constante en AWS
 
-1. **Iniciar nuevo proyecto**: En el dashboard de Vercel, haz clic en "New Project"
-2. **Importar desde GitHub**: Selecciona "Import Git Repository"
-3. **Seleccionar repositorio**: Busca y selecciona tu repositorio `edustreaming`
-4. **Configurar proyecto**: Vercel detectará automáticamente que es un proyecto Vite/React
+#### **Desarrollo y Testing:**
+- **Preview URLs**: Cada branch tiene su propia URL de prueba
+- **Variables de entorno**: Configuración fácil de diferentes entornos
+- **Analytics integrado**: Métricas de rendimiento incluidas
 
-### Paso 4: Configurar el Despliegue
+### Configuración de Vercel
 
-1. **Framework Preset**: Vercel debería detectar automáticamente "Vite" como framework
-2. **Root Directory**: Deja vacío (usar raíz del repositorio)
-3. **Build Command**: Vercel usará automáticamente `npm run build`
-4. **Output Directory**: Vercel usará automáticamente `dist`
-5. **Install Command**: Vercel usará automáticamente `npm install`
+#### Paso 1: Crear Cuenta en Vercel
 
-### Paso 5: Desplegar la Aplicación
+1. **Navegar** a https://vercel.com
+2. **Hacer clic** en "Sign Up"
+3. **Seleccionar** "Continue with GitHub"
+4. **Autorizar** Vercel para acceder a GitHub
 
-1. **Deploy**: Haz clic en "Deploy" para iniciar el primer despliegue
-2. **Esperar construcción**: Vercel construirá tu aplicación automáticamente
-3. **Verificar logs**: Revisa los logs de construcción para asegurarte de que no hay errores
-4. **URL de producción**: Una vez completado, obtendrás una URL como `https://edustreaming-xxx.vercel.app`
+#### Paso 2: Conectar Repositorio
 
-### Paso 6: Despliegues Automáticos
+1. **En el dashboard de Vercel**, hacer clic en "New Project"
+2. **Seleccionar** el repositorio "EduStreaming" de GitHub
+3. **Hacer clic** en "Import"
 
-Una vez configurado, Vercel desplegará automáticamente tu aplicación cada vez que:
+#### Paso 3: Configurar Proyecto
 
-1. **Push a main**: Hagas push a la rama principal
-2. **Pull Request**: Crear un pull request (despliegue de preview)
-3. **Merge**: Hacer merge de cambios a la rama principal
+1. **Framework Preset**: Seleccionar "Vite"
+2. **Root Directory**: Dejar por defecto (./)
+3. **Build Command**: `npm run build`
+4. **Output Directory**: `dist`
+5. **Install Command**: `npm install`
 
-### Monitoreo y Analytics
+#### Paso 4: Desplegar
 
-1. **Analytics**: Vercel proporciona analytics básicos de tu aplicación
-2. **Speed Insights**: Métricas de rendimiento automáticas
-3. **Web Vitals**: Core Web Vitals para SEO y UX
-4. **Logs**: Logs de la aplicación en tiempo real
+1. **Hacer clic** en "Deploy"
+2. **Esperar** a que se complete el build (2-5 minutos)
+3. **Verificar** que el despliegue sea exitoso
+4. **Acceder** a la URL proporcionada por Vercel
 
-### ¿Por qué Usar Vercel para EduStreaming?
+### Monitoreo y Gestión
 
-Vercel es la plataforma ideal para desplegar aplicaciones React como EduStreaming por las siguientes razones:
+#### Dashboard de Vercel:
+- **Analytics**: Métricas de rendimiento y uso
+- **Functions**: Monitoreo de serverless functions
+- **Domains**: Gestión de dominios personalizados
+- **Environment Variables**: Configuración de variables de entorno
 
-#### **Simplicidad y Velocidad de Despliegue**
-- **Configuración cero**: Vercel detecta automáticamente que es una aplicación Vite/React
-- **Despliegue en segundos**: Desde el push a GitHub hasta la aplicación en vivo en menos de 2 minutos
-- **Sin configuración de servidor**: No necesitas configurar EC2, Load Balancers, o bases de datos
-
-#### **Optimización para Frontend**
-- **Edge Computing**: Tu aplicación se ejecuta en el edge más cercano al usuario
-- **CDN integrado**: Contenido estático servido desde múltiples ubicaciones globales
-- **Compresión automática**: Gzip/Brotli habilitados automáticamente
-- **Caching inteligente**: Cache de archivos estáticos optimizado para React
-
-#### **Integración Perfecta con GitHub**
-- **Despliegues automáticos**: Cada push a main genera un nuevo despliegue
-- **Preview deployments**: Cada Pull Request genera una URL única para testing
-- **Rollback fácil**: Puedes volver a cualquier versión anterior con un clic
-
-### Vercel vs AWS: ¿Por qué Vercel es Mejor para EduStreaming?
-
-#### **Complejidad de Configuración**
-
-**AWS (EC2 + S3 + CloudFront):**
-- Configurar instancia EC2 (tamaño, región, seguridad)
-- Instalar Node.js, Nginx, PM2
-- Configurar S3 para archivos estáticos
-- Configurar CloudFront para CDN
-- Configurar Load Balancer
-- Configurar Auto Scaling Groups
-- Configurar Route 53 para DNS
-- **Tiempo estimado**: 4-6 horas de configuración
-
-**Vercel:**
-- Conectar repositorio GitHub
-- Hacer clic en "Deploy"
-- **Tiempo estimado**: 2 minutos
-
-#### **Costo para Aplicaciones Pequeñas/Medianas**
-
-**AWS:**
-- EC2 t3.micro: ~$8-10/mes
-- S3 storage: ~$1-2/mes
-- CloudFront: ~$1-3/mes
-- Route 53: ~$0.50/mes
-- **Total**: ~$10-15/mes mínimo
-
-**Vercel:**
-- Plan gratuito: 100GB bandwidth, deployments ilimitados
-- **Total**: $0/mes para proyectos pequeños
-
-#### **Mantenimiento y Monitoreo**
-
-**AWS:**
-- Actualizar instancias manualmente
-- Monitorear logs con CloudWatch
-- Configurar alertas
-- Gestionar certificados SSL
-- Actualizar dependencias del servidor
-
-**Vercel:**
-- Actualizaciones automáticas
-- Logs integrados en dashboard
-- SSL automático
-- Zero maintenance
-
-#### **Escalabilidad**
-
-**AWS:**
-- Configurar Auto Scaling Groups
-- Configurar Load Balancers
-- Gestionar múltiples instancias
-- Configurar health checks
-
-**Vercel:**
-- Escalado automático e infinito
-- Edge computing global
-- Sin configuración adicional
-
-#### **Desarrollo y Testing**
-
-**AWS:**
-- Crear staging environments manualmente
-- Configurar CI/CD con GitHub Actions
-- Gestionar múltiples entornos
-
-**Vercel:**
-- Preview deployments automáticos por PR
-- Staging automático
-- Integración nativa con GitHub
-
-### Casos Donde AWS Sería Mejor
-
-AWS sería más apropiado si necesitaras:
-- **Backend complejo**: APIs con base de datos, microservicios
-- **Procesamiento pesado**: Machine Learning, video processing
-- **Compliance específico**: HIPAA, SOX, requerimientos gubernamentales
-- **Control total**: Configuración específica de servidor, software personalizado
-
-### Conclusión para EduStreaming
-
-Para una aplicación frontend como EduStreaming que:
-- Es principalmente una SPA (Single Page Application)
-- No requiere backend complejo
-- Necesita despliegue rápido y confiable
-- Debe ser accesible globalmente
-- Requiere actualizaciones frecuentes
-
-**Vercel es la opción óptima** porque ofrece simplicidad, velocidad, costo-efectividad y todas las características necesarias sin la complejidad de AWS.
+#### Despliegues Automáticos:
+- **Cada push a main**: Despliegue automático a producción
+- **Pull requests**: Preview deployments automáticos
+- **Rollback**: Reversión a versiones anteriores desde el dashboard
 
 ---
 
 ## Configuración del Proyecto
 
-### Estructura del Proyecto:
+### Paso 1: Clonar el Repositorio
+
+1. **Abrir** PowerShell o Command Prompt
+2. **Navegar** al directorio donde se desea clonar el proyecto
+3. **Ejecutar** el siguiente comando:
+   ```bash
+   git clone https://github.com/tu-usuario/EduStreaming.git
+   ```
+4. **Navegar** al directorio del proyecto:
+   ```bash
+   cd EduStreaming
+   ```
+
+### Paso 2: Verificar la Estructura del Proyecto
+
+La estructura del proyecto debe ser similar a:
 ```
-edustreaming/
-├── src/                    # Código fuente de la aplicación
-├── public/                 # Archivos públicos
-├── package.json           # Dependencias del proyecto
-├── vite.config.js         # Configuración de Vite
-├── Dockerfile             # Configuración para producción
-├── Dockerfile.dev         # Configuración para desarrollo
-├── docker-compose.yml     # Orquestación de servicios
-├── nginx.conf             # Configuración del servidor web
-├── deploy.bat             # Script de despliegue (Windows)
-└── .dockerignore          # Archivos a ignorar en Docker
+EduStreaming/
+├── src/
+│   ├── components/
+│   ├── pages/
+│   ├── services/
+│   └── styles/
+├── public/
+├── docker-compose.yml
+├── Dockerfile
+├── package.json
+└── README.md
 ```
 
-### Archivos de Configuración Docker:
+### Paso 3: Verificar Archivos Docker
 
-#### Dockerfile (Producción):
-- **Multi-stage build** para optimización
-- **Node.js 18 Alpine** para construcción
-- **Nginx Alpine** para servidor web
-- **Usuario no-root** para seguridad
- - **Sobre Alpine Linux**: Alpine es una distribución minimalista (musl) que reduce el peso de la imagen; se utiliza Node.js 18 en la fase de build para compilar y empaquetar la SPA de forma eficiente.
+**Dockerfile** (debe existir en la raíz del proyecto):
+```dockerfile
+# Dockerfile para desarrollo
+FROM node:18-alpine
 
-#### Dockerfile.dev (Desarrollo):
-- **Hot reload** habilitado
-- **Puerto 5173** para Vite
-- **Volúmenes montados** para cambios en tiempo real
+WORKDIR /app
 
-#### docker-compose.yml:
-- **Servicio de producción** en puerto 3000
-- **Servicio de desarrollo** en puerto 5173
-- **Health checks** configurados
-- **Redes personalizadas**
+COPY package*.json ./
+RUN npm install
+
+COPY . .
+
+EXPOSE 3000
+
+CMD ["npm", "run", "dev"]
+```
+
+**docker-compose.yml** (debe existir en la raíz del proyecto):
+```yaml
+version: '3.8'
+
+services:
+  edustreaming:
+    build: .
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+```
 
 ---
 
-## Despliegue de la Aplicación
+## Despliegue en Desarrollo
 
-### Opción 1: Usando Scripts (Recomendado)
+### Paso 1: Construir la Imagen Docker
 
-#### En Windows:
-```cmd
-# Navegar al directorio del proyecto
-cd C:\ruta\a\tu\proyecto\edustreaming
+1. **Abrir** PowerShell en el directorio del proyecto
+2. **Ejecutar** el siguiente comando:
+   ```bash
+   docker-compose build
+   ```
+3. **Esperar** a que se complete la construcción (2-5 minutos)
 
-# Modo desarrollo (con hot reload)
-deploy.bat dev
+### Paso 2: Iniciar el Contenedor
 
-# Modo producción
-deploy.bat prod
+1. **Ejecutar** el siguiente comando:
+   ```bash
+   docker-compose up
+   ```
+2. **Verificar** que no haya errores en la salida
+3. **Esperar** a que aparezca el mensaje "Local: http://localhost:3000"
 
-# Ver logs
-deploy.bat logs
+### Paso 3: Acceder a la Aplicación
 
-# Detener aplicación
-deploy.bat stop
-```
+1. **Abrir** el navegador web
+2. **Navegar** a: http://localhost:3000
+3. **Verificar** que la aplicación cargue correctamente
+4. **Probar** la funcionalidad básica (navegación, login, etc.)
 
-#### En Windows (PowerShell):
-```powershell
-# Navegar al directorio del proyecto
-cd C:\ruta\a\tu\proyecto\edustreaming
+### Paso 4: Verificar Logs
 
-# Modo desarrollo (con hot reload)
-.\deploy.bat dev
-
-# Modo producción
-.\deploy.bat prod
-
-# Ver logs
-.\deploy.bat logs
-
-# Detener aplicación
-.\deploy.bat stop
-```
-
-### Opción 2: Usando Docker Compose Directamente
-
-#### Modo Desarrollo:
-```bash
-# Construir y levantar en modo desarrollo
-docker-compose --profile dev up -d edustreaming-dev
-
-# La aplicación estará disponible en: http://localhost:5173
-```
-
-#### Modo Producción:
-```bash
-# Construir y levantar en modo producción
-docker-compose up -d edustreaming
-
-# La aplicación estará disponible en: http://localhost:3000
-```
-
-### Proceso de Construcción:
-
-1. **Descarga de imágenes base**: Docker descarga Node.js y Nginx
-2. **Instalación de dependencias**: npm install ejecuta automáticamente
-3. **Construcción de la aplicación**: Vite build genera archivos optimizados
-4. **Configuración de Nginx**: Servidor web configurado para SPA
-5. **Inicio del contenedor**: Aplicación lista para usar
+1. **En la terminal** donde se ejecutó docker-compose up
+2. **Observar** los logs de la aplicación
+3. **Verificar** que no haya errores críticos
+4. **Para detener** la aplicación: `Ctrl + C`
 
 ---
 
-## Comandos Útiles
+## Despliegue en Producción
 
-### Comandos de Docker:
+### Paso 1: Preparar el Dockerfile de Producción
+
+**Dockerfile** (versión optimizada para producción):
+```dockerfile
+# Multi-stage build para producción
+FROM node:18-alpine AS builder
+
+WORKDIR /app
+
+COPY package*.json ./
+RUN npm ci --only=production
+
+COPY . .
+RUN npm run build
+
+# Etapa de producción
+FROM nginx:alpine
+
+COPY --from=builder /app/dist /usr/share/nginx/html
+COPY nginx.conf /etc/nginx/nginx.conf
+
+EXPOSE 80
+
+CMD ["nginx", "-g", "daemon off;"]
+```
+
+**Nota sobre Alpine Linux**: Se utiliza Alpine Linux como base de imagen porque es extremadamente ligero (solo ~5MB) comparado con imágenes estándar de Ubuntu (~70MB). Esto resulta en:
+- **Tiempos de descarga más rápidos**
+- **Menor uso de espacio en disco**
+- **Inicio más rápido de contenedores**
+- **Menor superficie de ataque** (menos paquetes instalados)
+
+### Paso 2: Configurar Nginx
+
+**nginx.conf** (archivo de configuración optimizado):
+```nginx
+events {
+    worker_connections 1024;
+}
+
+http {
+    include       /etc/nginx/mime.types;
+    default_type  application/octet-stream;
+    
+    sendfile        on;
+    keepalive_timeout  65;
+    
+    server {
+        listen       80;
+        server_name  localhost;
+        
+        location / {
+            root   /usr/share/nginx/html;
+            index  index.html index.htm;
+            try_files $uri $uri/ /index.html;
+        }
+        
+        location /static/ {
+            expires 1y;
+            add_header Cache-Control "public, immutable";
+        }
+    }
+}
+```
+
+### Paso 3: Construir Imagen de Producción
+
+1. **Ejecutar** el siguiente comando:
+   ```bash
+   docker build -t edustreaming:production .
+   ```
+2. **Esperar** a que se complete la construcción
+3. **Verificar** que la imagen se haya creado:
+   ```bash
+   docker images
+   ```
+
+### Paso 4: Ejecutar en Producción
+
+1. **Ejecutar** el siguiente comando:
+   ```bash
+   docker run -d -p 80:80 --name edustreaming-prod edustreaming:production
+   ```
+2. **Verificar** que el contenedor esté ejecutándose:
+   ```bash
+   docker ps
+   ```
+3. **Acceder** a la aplicación en: http://localhost
+
+### Paso 5: Verificar el Despliegue
+
+1. **Abrir** el navegador
+2. **Navegar** a: http://localhost
+3. **Verificar** que la aplicación cargue correctamente
+4. **Probar** todas las funcionalidades principales
+5. **Verificar** que los assets se carguen desde el cache
+
+---
+
+## Comandos Útiles de Docker
+
+### Comandos Básicos
+
 ```bash
-# Ver contenedores corriendo
+# Ver contenedores en ejecución
 docker ps
 
 # Ver todas las imágenes
@@ -523,162 +489,111 @@ docker rm <container_name>
 
 # Eliminar una imagen
 docker rmi <image_name>
-
-# Limpiar sistema Docker
-docker system prune -a
 ```
 
-### Comandos de Docker Compose:
+### Comandos de Desarrollo
+
 ```bash
-# Levantar servicios
+# Construir imagen
+docker-compose build
+
+# Iniciar servicios
+docker-compose up
+
+# Iniciar en segundo plano
 docker-compose up -d
 
 # Detener servicios
 docker-compose down
 
 # Ver logs
-docker-compose logs -f
+docker-compose logs
 
-# Reconstruir servicios
-docker-compose build --no-cache
-
-# Ver estado de servicios
-docker-compose ps
+# Reconstruir y reiniciar
+docker-compose up --build
 ```
 
-### Comandos del Script de Despliegue:
-```cmd
-# Desarrollo
-deploy.bat dev
+### Comandos de Limpieza
 
-# Producción
-deploy.bat prod
+```bash
+# Eliminar contenedores detenidos
+docker container prune
 
-# Construir solo
-deploy.bat build
+# Eliminar imágenes no utilizadas
+docker image prune
 
-# Detener
-deploy.bat stop
+# Eliminar volúmenes no utilizados
+docker volume prune
 
-# Limpiar
-deploy.bat clean
-
-# Ver logs
-deploy.bat logs
+# Limpieza completa
+docker system prune -a
 ```
 
 ---
 
-## 
+## Consideraciones para Producción
 
-## Acceso a la Aplicación
+### Seguridad
 
-### URLs de Acceso:
+1. **Actualizar regularmente** las imágenes base
+2. **Usar imágenes oficiales** de Docker Hub
+3. **Configurar firewall** para limitar acceso
+4. **Implementar HTTPS** con certificados SSL
+5. **Usar secrets** para información sensible
 
-#### Modo Desarrollo:
-- **URL Principal**: http://localhost:5173
-- **Características**: 
-  - Hot reload automático
-  - Herramientas de desarrollo
-  - Debugging habilitado
-  - Cambios en tiempo real
+### Monitoreo
 
-#### Modo Producción:
-- **URL Principal**: http://localhost:3000
-- **Características**:
-  - Optimizada para producción
-  - Compresión gzip
-  - Cache optimizado
-  - Configuración de seguridad
+1. **Configurar logs** centralizados
+2. **Implementar health checks** en Docker
+3. **Monitorear recursos** (CPU, memoria, disco)
+4. **Configurar alertas** para fallos
+5. **Usar herramientas** como Prometheus + Grafana
 
-### Endpoints Adicionales:
+### Escalabilidad
 
-#### Archivos Estáticos:
-- **CSS**: http://localhost:3000/assets/[filename].css
-- **JavaScript**: http://localhost:3000/assets/[filename].js
-- **Imágenes**: http://localhost:3000/assets/[filename].png
+1. **Usar Docker Swarm** o Kubernetes para orquestación
+2. **Implementar load balancing** con múltiples instancias
+3. **Configurar auto-scaling** basado en métricas
+4. **Usar bases de datos** externas para persistencia
+5. **Implementar CDN** para assets estáticos
 
-### Navegación en la Aplicación:
+### Backup y Recuperación
 
-1. **Página Principal**: Catálogo de cursos y streams
-2. **Búsqueda**: Funcionalidad de búsqueda avanzada
-3. **Notificaciones**: Sistema de notificaciones
-4. **Perfil**: Gestión de usuario
-5. **Dashboard**: Panel de administración (para profesores/admin)
+1. **Backup regular** de volúmenes de datos
+2. **Versionado** de imágenes Docker
+3. **Documentación** de procedimientos de recuperación
+4. **Testing** de procedimientos de backup
+5. **Almacenamiento** de backups en ubicaciones seguras
 
----
+### Optimización de Rendimiento
 
-## Monitoreo y Mantenimiento
-
-### Verificar Estado de la Aplicación:
-```bash
-# Estado de contenedores
-docker-compose ps
-
-# Uso de recursos
-docker stats
-
-# Logs en tiempo real
-docker-compose logs -f
-```
-
-### Actualizar la Aplicación:
-```bash
-# Detener servicios
-docker-compose down
-
-# Actualizar código
-git pull origin main
-
-# Reconstruir y levantar
-docker-compose up -d --build
-```
-
-### Backup y Restauración:
-```bash
-# Crear backup de volúmenes
-docker run --rm -v edustreaming_data:/data -v $(pwd):/backup alpine tar czf /backup/backup.tar.gz -C /data .
-
-# Restaurar backup
-docker run --rm -v edustreaming_data:/data -v $(pwd):/backup alpine tar xzf /backup/backup.tar.gz -C /data
-```
+1. **Usar multi-stage builds** para imágenes más pequeñas
+2. **Optimizar layers** de Docker para mejor caching
+3. **Configurar Nginx** para compresión y caching
+4. **Usar imágenes Alpine** para menor tamaño
+5. **Implementar lazy loading** en la aplicación
 
 ---
 
-## 
+## Conclusión
 
-## Soporte y Recursos
+Esta guía proporciona una base sólida para implementar EduStreaming usando Docker y Vercel. La combinación de containerización con Docker y el despliegue simplificado en Vercel ofrece una solución robusta, escalable y fácil de mantener para plataformas de streaming educativo.
 
-### Documentación Oficial:
-- **Docker**: https://docs.docker.com/
-- **Docker Compose**: https://docs.docker.com/compose/
-- **Vite**: https://vitejs.dev/
-- **React**: https://reactjs.org/
+### Próximos Pasos Recomendados:
 
-### Comunidad:
-- **Docker Community**: https://forums.docker.com/
-- **Stack Overflow**: https://stackoverflow.com/questions/tagged/docker
-- **GitHub Issues**: Reportar problemas en el repositorio del proyecto
+1. **Implementar CI/CD** con GitHub Actions
+2. **Agregar testing automatizado** en el pipeline
+3. **Configurar monitoreo** con herramientas profesionales
+4. **Implementar backup automatizado** de datos
+5. **Documentar procedimientos** de operación
 
 ### Recursos Adicionales:
-- **Docker Hub**: https://hub.docker.com/
-- **Best Practices**: https://docs.docker.com/develop/dev-best-practices/
-- **Security**: https://docs.docker.com/engine/security/
+
+- [Documentación oficial de Docker](https://docs.docker.com/)
+- [Guía de Vercel](https://vercel.com/docs)
+- [Mejores prácticas de Docker](https://docs.docker.com/develop/dev-best-practices/)
+- [Optimización de imágenes Docker](https://docs.docker.com/develop/dev-best-practices/dockerfile_best-practices/)
 
 ---
 
-## 
-
-## Felicitaciones
-
-Has configurado exitosamente Docker y desplegado la aplicación EduStreaming. 
-
-**Recuerda:**
-- Usa `deploy.bat dev` para desarrollo
-- Usa `deploy.bat prod` para producción
-- Monitorea los logs regularmente
-- Mantén Docker Desktop actualizado
-
-¡Disfruta de tu aplicación!
-
----
+**Nota**: Esta guía está diseñada para entornos educativos y de desarrollo. Para implementaciones en producción a gran escala, se recomienda consultar con especialistas en DevOps y seguir las mejores prácticas de la industria.
