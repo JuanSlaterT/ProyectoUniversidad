@@ -3,12 +3,18 @@ import { Box, Paper, Button, TextField, Typography } from '@mui/material';
 
 const RTC_CONFIG = {
   iceServers: [
-    { urls: 'stun:stun.cloudflare.com:3478' },
-    { urls: 'stun:stun.l.google.com:19302' },
-    { urls: 'stun:stun.relay.metered.ca:80' },
-    { urls: 'stun:stun.relay.metered.ca:3478' },
+    { urls: "stun:stun.cloudflare.com:3478" },
+    { urls: "stun:stun.l.google.com:19302" },
+    { urls: "stun:global.stun.twilio.com:3478" },
+
+    // TURN (metered)
     {
-      urls: "turn:standard.relay.metered.ca:80",
+      urls: "turn:standard.relay.metered.ca:3478?transport=udp",
+      username: "5ba02db1dfc79ad9e5e149a9",
+      credential: "sVQXYgfjx8X7Yns+",
+    },
+    {
+      urls: "turns:standard.relay.metered.ca:443",
       username: "5ba02db1dfc79ad9e5e149a9",
       credential: "sVQXYgfjx8X7Yns+",
     },
@@ -17,19 +23,9 @@ const RTC_CONFIG = {
       username: "5ba02db1dfc79ad9e5e149a9",
       credential: "sVQXYgfjx8X7Yns+",
     },
-    {
-      urls: "turn:standard.relay.metered.ca:443",
-      username: "5ba02db1dfc79ad9e5e149a9",
-      credential: "sVQXYgfjx8X7Yns+",
-    },
-    {
-      urls: "turns:standard.relay.metered.ca:443?transport=tcp",
-      username: "5ba02db1dfc79ad9e5e149a9",
-      credential: "sVQXYgfjx8X7Yns+",
-    },
   ],
-  iceCandidatePoolSize: 5,
-  iceTransportPolicy: 'all',
+  iceCandidatePoolSize: 1,
+  iceTransportPolicy: "all",
 };
 
 const waitIceComplete = (pc) => new Promise((res) => {
