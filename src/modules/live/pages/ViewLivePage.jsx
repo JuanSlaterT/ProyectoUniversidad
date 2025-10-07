@@ -40,7 +40,7 @@ const waitIceComplete = (pc) => new Promise((res, rej) => {
   const timeout = setTimeout(() => {
     console.log('Viewer - ICE gathering timeout');
     rej(new Error('ICE gathering timeout'));
-  }, 15000); // 15 segundos timeout
+  }, 60000); // 1 minuto timeout
 
   const onChange = () => {
     if (pc.iceGatheringState === 'complete') {
