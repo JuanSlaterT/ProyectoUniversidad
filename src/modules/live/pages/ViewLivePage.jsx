@@ -5,12 +5,8 @@ const RTC_CONFIG = {
   iceServers: [
     { urls: 'stun:stun.cloudflare.com:3478' },
     { urls: 'stun:stun.l.google.com:19302' },
-    { urls: 'stun:global.stun.twilio.com:3478' },
     { urls: 'stun:stun.relay.metered.ca:80' },
     { urls: 'stun:stun.relay.metered.ca:3478' },
-    {
-      urls: "stun:stun.relay.metered.ca:80",
-    },
     {
       urls: "turn:standard.relay.metered.ca:80",
       username: "5ba02db1dfc79ad9e5e149a9",
