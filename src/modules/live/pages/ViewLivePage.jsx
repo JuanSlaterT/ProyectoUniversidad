@@ -3,18 +3,14 @@ import { Box, Paper, Button, TextField, Typography } from '@mui/material';
 
 const RTC_CONFIG = {
   iceServers: [
-    { urls: "stun:stun.cloudflare.com:3478" },
-    { urls: "stun:stun.l.google.com:19302" },
-    { urls: "stun:global.stun.twilio.com:3478" },
-
-    // TURN (metered)
+    { urls: 'stun:stun.cloudflare.com:3478' },
+    { urls: 'stun:stun.l.google.com:19302' },
+    { urls: 'stun:global.stun.twilio.com:3478' },
     {
-      urls: "turn:standard.relay.metered.ca:3478?transport=udp",
-      username: "5ba02db1dfc79ad9e5e149a9",
-      credential: "sVQXYgfjx8X7Yns+",
+      urls: "stun:stun.relay.metered.ca:80",
     },
     {
-      urls: "turns:standard.relay.metered.ca:443",
+      urls: "turn:standard.relay.metered.ca:80",
       username: "5ba02db1dfc79ad9e5e149a9",
       credential: "sVQXYgfjx8X7Yns+",
     },
@@ -23,15 +19,32 @@ const RTC_CONFIG = {
       username: "5ba02db1dfc79ad9e5e149a9",
       credential: "sVQXYgfjx8X7Yns+",
     },
+    {
+      urls: "turn:standard.relay.metered.ca:443",
+      username: "5ba02db1dfc79ad9e5e149a9",
+      credential: "sVQXYgfjx8X7Yns+",
+    },
+    {
+      urls: "turns:standard.relay.metered.ca:443?transport=tcp",
+      username: "5ba02db1dfc79ad9e5e149a9",
+      credential: "sVQXYgfjx8X7Yns+",
+    },
   ],
-  iceCandidatePoolSize: 1,
-  iceTransportPolicy: "all",
+  iceCandidatePoolSize: 10,
+  iceTransportPolicy: 'all',
 };
 
-const waitIceComplete = (pc) => new Promise((res) => {
+const waitIceComplete = (pc) => new Promise((res, rej) => {
   if (pc.iceGatheringState === 'complete') return res();
+
+  const timeout = setTimeout(() => {
+    console.log('Viewer - ICE gathering timeout');
+    rej(new Error('ICE gathering timeout'));
+  }, 15000); // 15 segundos timeout
+
   const onChange = () => {
     if (pc.iceGatheringState === 'complete') {
+      clearTimeout(timeout);
       pc.removeEventListener('icegatheringstatechange', onChange);
       res();
     }
@@ -39,9 +52,75 @@ const waitIceComplete = (pc) => new Promise((res) => {
   pc.addEventListener('icegatheringstatechange', onChange);
 });
 
+// Función para validar y limpiar la Offer
+const validateAndCleanOffer = (offerText) => {
+  console.log('Viewer - Validando Offer...');
+
+  // Verificar que no esté vacía
+  if (!offerText || !offerText.trim()) {
+    throw new Error('La Offer no puede estar vacía');
+  }
+
+  // Limpiar espacios y caracteres extra
+  let cleanedOffer = offerText.trim();
+
+  // Verificar longitud mínima
+  if (cleanedOffer.length < 100) {
+    throw new Error('La Offer parece estar incompleta (muy corta)');
+  }
+
+  // Verificar que contenga elementos básicos de SDP
+  if (!cleanedOffer.includes('v=0') || !cleanedOffer.includes('m=')) {
+    throw new Error('La Offer no parece ser un SDP válido');
+  }
+
+  // Intentar parsear como JSON
+  let offer;
+  try {
+    offer = JSON.parse(cleanedOffer);
+  } catch (parseError) {
+    console.error('Viewer - Error parseando Offer como JSON:', parseError);
+    throw new Error('La Offer no es un JSON válido. Verifica que se copió completa.');
+  }
+
+  // Validar estructura de la Offer
+  if (!offer || typeof offer !== 'object') {
+    throw new Error('La Offer no es un objeto válido');
+  }
+
+  if (!offer.type) {
+    throw new Error('La Offer no tiene el campo "type"');
+  }
+
+  if (!offer.sdp) {
+    throw new Error('La Offer no tiene el campo "sdp"');
+  }
+
+  if (offer.type !== 'offer') {
+    throw new Error(`El tipo de descripción debe ser "offer", pero es "${offer.type}"`);
+  }
+
+  if (typeof offer.sdp !== 'string' || offer.sdp.length < 100) {
+    throw new Error('El campo "sdp" no es válido o está incompleto');
+  }
+
+  // Validar contenido SDP básico
+  if (!offer.sdp.includes('v=0') || !offer.sdp.includes('m=')) {
+    throw new Error('El SDP no tiene el formato correcto');
+  }
+
+  console.log('Viewer - Offer validada correctamente');
+  console.log('Viewer - Tipo:', offer.type);
+  console.log('Viewer - SDP length:', offer.sdp.length);
+  console.log('Viewer - SDP preview:', offer.sdp.substring(0, 100) + '...');
+
+  return offer;
+};
+
 export default function ViewLivePage() {
   const remoteVideoRef = useRef(null);
   const pcRef = useRef(null);
+  const retryCountRef = useRef(0);
 
   const [offerText, setOfferText] = useState('');
   const [answerText, setAnswerText] = useState('');
@@ -54,7 +133,10 @@ export default function ViewLivePage() {
     let isAnswerCreated = false;
 
     try {
-      const offer = JSON.parse(offerText);
+      // 🔥 VALIDACIÓN Y LIMPIEZA DE OFFER
+      const offer = validateAndCleanOffer(offerText);
+
+      console.log('Viewer - Creando RTCPeerConnection...');
       const pc = new RTCPeerConnection(RTC_CONFIG);
       pcRef.current = pc;
 
@@ -145,20 +227,47 @@ export default function ViewLivePage() {
       }, 120000); // 2 minutos timeout
 
     } catch (e) {
-      setError('Offer inválida: ' + e.message);
+      console.error('Viewer - Error procesando Offer:', e);
+      setError('Error procesando Offer: ' + e.message);
+
+      // Limpiar conexión fallida
+      if (pcRef.current) {
+        try {
+          pcRef.current.close();
+        } catch (cleanupError) {
+          console.error('Viewer - Error limpiando conexión:', cleanupError);
+        }
+        pcRef.current = null;
+      }
     }
   };
 
   const copy = async (txt) => {
-    try { await navigator.clipboard.writeText(txt); } catch { }
+    try {
+      await navigator.clipboard.writeText(txt);
+      console.log('Viewer - Texto copiado al portapapeles');
+    } catch (e) {
+      console.error('Viewer - Error copiando texto:', e);
+    }
   };
 
   const stopAll = () => {
-    try { pcRef.current && pcRef.current.close(); } catch { }
-    pcRef.current = null;
+    console.log('Viewer - Deteniendo todo...');
+
+    // Limpiar conexión WebRTC
+    if (pcRef.current) {
+      try {
+        pcRef.current.close();
+      } catch (e) {
+        console.error('Viewer - Error cerrando conexión:', e);
+      }
+      pcRef.current = null;
+    }
+
     setStatus('idle');
     setOfferText('');
     setAnswerText('');
+    retryCountRef.current = 0;
   };
 
   useEffect(() => () => stopAll(), []);
@@ -179,8 +288,11 @@ export default function ViewLivePage() {
           multiline fullWidth minRows={4}
           value={offerText} onChange={e => setOfferText(e.target.value)}
           sx={{ mt: 1 }}
+          placeholder="Pega aquí la Offer completa del host..."
         />
-        <Button sx={{ mt: 1 }} variant="contained" onClick={createAnswer} disabled={!offerText}>Generar Answer</Button>
+        <Button sx={{ mt: 1 }} variant="contained" onClick={createAnswer} disabled={!offerText.trim()}>
+          Generar Answer
+        </Button>
       </Paper>
 
       <Paper sx={{ p: 2 }}>
